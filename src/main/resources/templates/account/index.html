@@ -23,23 +23,15 @@
                     <p class="text-center small">個人情報を入力してアカウントを作成してください。</p>
                   </div>
 
-                  <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    <div>
-                      <i class="bi bi-exclamation-octagon me-1"></i>
-                      <span>エラーメッセージを表示します。</span>
-                    </div>
-                    <div>
-                      <i class="bi bi-exclamation-octagon me-1"></i>
-                      <span>エラーメッセージを表示します。</span>
-                    </div>
-                    <div>
-                      <i class="bi bi-exclamation-octagon me-1"></i>
-                      <span>エラーメッセージを表示します。</span>
-                    </div>
+                  <div class="alert alert-danger alert-dismissible fade show" role="alert" th:if="${validationErrors}">
+					<div th:object="${requestAccount}" th:each="errMsg : ${errorMessages}">
+					  <i class="bi bi-exclamation-octagon me-1"></i>
+					  <span th:text="${errMsg}">エラーメッセージを表示します。</span>
+					</div>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                   </div>
 
-                  <form class="row g-3 needs-validation" th:action="@{/account/complete}" novalidate>
+                  <form class="row g-3 needs-validation" th:action="@{/account/regist}" method="post" novalidate>
                     <div class="col-12">
                       <label for="yourName" class="form-label">お名前</label>
                       <input type="text" name="name" class="form-control" id="yourName" required>
@@ -48,7 +40,7 @@
 
                     <div class="col-12">
                       <label for="yourEmail" class="form-label">メールアドレス</label>
-                      <input type="email" name="email" class="form-control" id="yourEmail" required>
+                      <input type="email" name="emailAddress" class="form-control" id="yourEmail" required>
                       <div class="invalid-feedback">有効なメールアドレスを入力してください。</div>
                     </div>
 
@@ -56,7 +48,7 @@
                       <label for="yourUsername" class="form-label">ログインID</label>
                       <div class="input-group has-validation">
                         <span class="input-group-text" id="inputGroupPrepend">@</span>
-                        <input type="text" name="username" class="form-control" id="yourUsername" required>
+                        <input type="text" name="loginId" class="form-control" id="yourUsername" required>
                         <div class="invalid-feedback">ログインIDを入力してください。</div>
                       </div>
                     </div>
