@@ -66,7 +66,7 @@
 
           <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
             <!--/* タイムスタンプをURLパラメータに指定している理由は、更新直後ブラウザキャッシュにより表示されないことがある為、設定している。 */-->
-            <img th:src="(*{users.iconUri} ? ${@storageService.getDataUri(users.iconUri)} : '/assets/img/profile-dummy.png')" alt="Profile" class="rounded-circle">
+            <img th:src="(*{users.iconUri} ? ${@storageService.getDataUri(users.iconUri)} : '/assets/img/profile-img.jpg')" alt="Profile" class="rounded-circle">
             <span class="d-none d-md-block dropdown-toggle ps-2" th:text='${users.name}'>佐藤太郎</span>
           </a><!-- End Profile Iamge Icon -->
 
@@ -79,7 +79,7 @@
             </li>
 
             <li>
-              <a class="dropdown-item d-flex align-items-center" href="/profile/">
+              <a class="dropdown-item d-flex align-items-center" href="/profile">
                 <i class="bi bi-person"></i>
                 <span>プロフィールを見る</span>
               </a>
@@ -103,6 +103,36 @@
   </header><!-- End Header -->
   <!-- ======= /フラグメント::Header ======= -->
 
+  <!-- ======= フラグメント::Sidebar ======= -->
+  <aside th:fragment="sidebar" id="sidebar" class="sidebar">
+
+    <ul class="sidebar-nav" id="sidebar-nav">
+
+      <li class="nav-item">
+        <a class="nav-link " href="/home">
+          <i class="bi bi-house-door"></i>
+          <span>Home</span>
+        </a>
+      </li><!-- End Dashboard Nav -->
+
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="/profile">
+          <i class="bi bi-person"></i>
+          <span>プロフィール</span>
+        </a>
+      </li><!-- End Profile Page Nav -->
+
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="/friend/list">
+          <i class="bi bi-people"></i>
+          <span>フレンド</span>
+        </a>
+      </li><!-- End F.A.Q Page Nav -->
+
+    </ul>
+
+  </aside>
+  <!-- ======= フラグメント::Sidebar ======= -->
 
   <!-- ======= ショルダー（ヘッダー、フッター）デザイン確認用のサンプルボディ ======= -->
   <main id="main" class="main">
