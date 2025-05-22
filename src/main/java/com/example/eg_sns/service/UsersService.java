@@ -65,7 +65,7 @@ public class UsersService {
 		users.setLoginId(requestAccount.getLoginId());
 		users.setPassword(requestAccount.getPassword());
 		users.setName(requestAccount.getName());
-		users.setEmail_address(requestAccount.getEmailAddress());
+		users.setEmailAddress(requestAccount.getEmailAddress());
 		repository.save(users);
 	}
 
