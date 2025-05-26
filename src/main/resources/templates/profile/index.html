@@ -233,6 +233,7 @@
 												<span id="previewbox">
 													<!--/* タイムスタンプをURLパラメータに指定している理由は、更新直後ブラウザキャッシュにより表示されないことがある為、設定している。 */-->
 													<img th:src="(*{iconUri} ? ${@storageService.getDataUri(requestModifyAccount.iconUri)} : '/assets/img/profile-img.jpg')"
+														src="/assets/img/profile-img.jpg"
 														alt="Profile" class="rounded-circle" id="previewimg"
 														style="height: 120px;">
 												</span>
@@ -245,7 +246,7 @@
 															id="filesendHidden" th:value="*{iconUri}">
 													</label>
 													<a href="#" class="btn btn-danger btn-sm"
-														title="Remove my profile image"><i class="bi bi-trash"></i></a>
+														title="Remove my profile image" onclick="resetPreview();"><i class="bi bi-trash"></i></a>
 												</div>
 											</div>
 										</div>
