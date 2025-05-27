@@ -1,5 +1,7 @@
 package com.example.eg_sns.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -51,6 +53,22 @@ public class UsersService {
 
 		Users users = repository.findByLoginIdAndPassword(loginId, password);
 		log.info("ユーザー検索結果。：loginId={}, password={}, users={}", loginId, password, users);
+
+		return users;
+	}
+
+	/**
+	 * 全ユーザーの検索を行う。
+	 * ログインIDを指定し、ユーザーを検索する。
+	 *
+	 * @param loginId ログインID
+	 * @return ユーザー情報を返す。
+	 */
+	public List<Users> findAllUsers() {
+		log.info("全ユーザーを探索します。");
+
+		List<Users> users = (List<Users>) repository.findAll();
+		log.info("ユーザー検索結果。：users={}", users);
 
 		return users;
 	}
