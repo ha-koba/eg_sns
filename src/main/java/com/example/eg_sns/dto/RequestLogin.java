@@ -17,7 +17,7 @@ public class RequestLogin extends DtoBase {
 
 	/** ログインID */
 	@NotBlank(message = "ログインIDを入力してください。")
-	@Size(max = 32, message = "お名前は最大32文字です。")
+	@Size(max = 32, message = "ログインIDは最大32文字です。")
 	private String loginId;
 
 	/** パスワード */
