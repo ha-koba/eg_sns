@@ -39,16 +39,22 @@
 									</tr>
 								</thead>
 								<tbody>
-									<tr th:each="user: ${usersList}">
-										<th scope="row"><img src="/assets/img/news-1.jpg" alt="" style="width: 80px;" th:src="${user.iconUri}">
+									<tr th:each="users: ${usersList}">
+										<th scope="row"><img src="/assets/img/news-1.jpg" alt="" style="width: 80px;" th:src="${users.iconUri}">
 										</th>
-										<td><a href="/profile/" th:text="${user.name}">〇〇</a></td>
-										<td th:text="${user.about}">
+										<td><a href="/profile/" th:text="${users.name}">〇〇</a></td>
+										<td class="pre-wrap" th:text="${users.about}">
 											こんにちは、〇〇と申します。
 										</td>
-										<td><button type="button"
-												class="btn btn-primary rounded-pill">承認</button>&nbsp;<button
-												type="button" class="btn btn-danger rounded-pill">却下</button></td>
+										<td>
+											<form th:action="@{/friend/process}" method="post">
+												<input type="hidden" name="usersId" th:value="${loginUsers.id}">
+												<input type="hidden" name="friendUsersId" th:value="${users.id}">
+												<button type="submit"
+													class="btn btn-primary rounded-pill" name="action" value="approve">承認</button>&nbsp;<button
+													type="submit" class="btn btn-danger rounded-pill" name="action" value="reject">却下</button>
+											</form>
+										</td>
 									</tr>
 								</tbody>
 							</table>

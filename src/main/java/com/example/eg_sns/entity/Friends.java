@@ -35,7 +35,7 @@ public class Friends extends EntityBase {
 	@Column(name = "friend_users_id", nullable = false)
 	private String friendUsersId;
 	
-	/** フレンド申請の状態 (0:保留中, 1:承認済み, 2:却下) */
+	/** 承認ステータス(1.申請中[自分]、2.承認待ち[相手]、3.承認[自分]、4.承諾[相手] */
 	@Column(name = "approval_status", nullable = false)
 	private int approvalStatus;
 }

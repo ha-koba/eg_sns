@@ -1,0 +1,23 @@
+package com.example.eg_sns.repository;
+
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.PagingAndSortingRepository;
+
+import com.example.eg_sns.entity.Friends;
+
+/**
+ * フレンド関連リポジトリインターフェース。
+ *
+ * @author ha-koba
+ */
+public interface FriendsRepository extends PagingAndSortingRepository<Friends, Long>, CrudRepository<Friends, Long> {
+
+	/**
+	 * フレンド情報の検索を行う。
+	 * ログインIDを指定し、フレンド情報を検索する。
+	 *
+	 * @param usersId ユーザーID
+	 * @return フレンド情報を返す。
+	 */
+	 Friends findByUsersId(String usersId);
+}
