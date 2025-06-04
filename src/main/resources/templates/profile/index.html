@@ -153,29 +153,31 @@
 							<h2 th:text="${requestModifyAccount.name}">佐藤太郎</h2>
 							<div class="social-links mt-2" th:if="${!isMyProfile}">
 								<form action="" method="post">
-									
+
 									<div th:if="${approvalStatus != null}" th:switch="${approvalStatus.name()}">
-										
+
 										<div th:case="APPLYING">
 											<button type="button" class="btn btn-primary rounded-pill">申請済み</button>
 										</div>
-										
+
 										<div th:case="APPROVAL_PENDING">
 											<button type="button" class="btn btn-primary rounded-pill">承認</button>
 											<button type="button" class="btn btn-primary rounded-pill">拒否</button>
 										</div>
 
 										<div th:case="AGREEMENT">
-											<button type="button" class="btn btn-primary rounded-pill disable">登録済み</button>
-											<button type="button" class="btn btn-primary rounded-pill disable">登録解除</button>
+											<button type="button"
+												class="btn btn-primary rounded-pill disable">登録済み</button>
+											<button type="button"
+												class="btn btn-primary rounded-pill disable">登録解除</button>
 										</div>
 
 										<div th:case="REJECTION">
 											<button type="submit" class="btn btn-primary rounded-pill">申請</button>
 										</div>
-										
+
 									</div>
-									
+
 								</form>
 							</div>
 						</div>
@@ -205,8 +207,7 @@
 
 								<div class="tab-pane fade show active profile-overview" id="profile-overview">
 									<h5 class="card-title">自己紹介</h5>
-									<p class="small fst-italic" 
-										th:text="${#strings.isEmpty(requestModifyAccount.about)} 
+									<p class="small fst-italic" th:text="${#strings.isEmpty(requestModifyAccount.about)} 
 										? '自己紹介文がありません。' 
 										: ${requestModifyAccount.about}">
 									</p>
@@ -220,7 +221,8 @@
 
 									<div class="row">
 										<div class="col-lg-3 col-md-4 label">メールアドレス</div>
-										<div class="col-lg-9 col-md-8" th:text="${requestModifyAccount.emailAddress}">tsato@dcworks.jp
+										<div class="col-lg-9 col-md-8" th:text="${requestModifyAccount.emailAddress}">
+											tsato@dcworks.jp
 										</div>
 									</div>
 
@@ -247,9 +249,8 @@
 												<span id="previewbox">
 													<!--/* タイムスタンプをURLパラメータに指定している理由は、更新直後ブラウザキャッシュにより表示されないことがある為、設定している。 */-->
 													<img th:src="(*{iconUri} ? ${@storageService.getDataUri(requestModifyAccount.iconUri)} : '/assets/img/profile-img.jpg')"
-														src="/assets/img/profile-img.jpg"
-														alt="Profile" class="rounded-circle" id="previewimg"
-														style="height: 120px;">
+														src="/assets/img/profile-img.jpg" alt="Profile"
+														class="rounded-circle" id="previewimg" style="height: 120px;">
 												</span>
 												<div class="pt-2">
 													<label>
@@ -260,7 +261,8 @@
 															id="filesendHidden" th:value="*{iconUri}">
 													</label>
 													<a href="#" class="btn btn-danger btn-sm"
-														title="Remove my profile image" onclick="resetPreview();"><i class="bi bi-trash"></i></a>
+														title="Remove my profile image" onclick="resetPreview();"><i
+															class="bi bi-trash"></i></a>
 												</div>
 											</div>
 										</div>
