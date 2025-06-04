@@ -25,14 +25,23 @@ public class FriendsService {
 	 * フレンド情報検索を行う。
 	 * ユーザーIDを指定し、フレンドを検索する。
 	 *
-	 * @param usersId ユーザーID
+	 * @param id ユーザーテーブルのID
 	 * @return フレンド情報を返す。
 	 */
-	public Friends findFriends(String usersId) {
-		log.info("フレンド情報を検索します。：usersId={}", usersId);
+	public Friends findFriends(Long id) {
+		log.info("フレンド情報を検索します。：id={}", id);
 		
-		Friends friends = repository.findByUsersId(usersId);
-		log.info("フレンド情報の検索結果。：usersId={}, friends={}", usersId, friends);
+		Friends friends = repository.findByUsersId(id);
+		log.info("フレンド情報の検索結果。：friends={}", friends);
+		
+		return friends;
+	}
+	
+	public Friends findFriends(Long usersId, Long friendUsersId) {
+		log.info("フレンド情報を検索します。：usersId={}, friendUsersId={}", usersId, friendUsersId);
+		
+		Friends friends = repository.findByUsersIdAndFriendUsersId(usersId, friendUsersId);
+		log.info("フレンド情報の検索結果。：friends={}", friends);
 		
 		return friends;
 	}
@@ -46,4 +55,5 @@ public class FriendsService {
 		log.info("フレンドを登録します。friends={}", friends);
 		repository.save(friends);
 	}
+	
 }

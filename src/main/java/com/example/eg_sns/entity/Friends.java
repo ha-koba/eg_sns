@@ -29,13 +29,13 @@ public class Friends extends EntityBase {
 
 	/** フレンドリクエストを送信したユーザーのID (外部キー) */
 	@Column(name = "users_id", nullable = false)
-	private String usersId;
+	private Long usersId;
 
 	/** フレンドリクエストを受信したユーザーのID (外部キー) */
 	@Column(name = "friend_users_id", nullable = false)
-	private String friendUsersId;
+	private Long friendUsersId;
 	
-	/** 承認ステータス(1.申請中[自分]、2.承認待ち[相手]、3.承認[自分]、4.承諾[相手] */
+	/** 承認ステータス */
 	@Column(name = "approval_status", nullable = false)
 	private int approvalStatus;
 }

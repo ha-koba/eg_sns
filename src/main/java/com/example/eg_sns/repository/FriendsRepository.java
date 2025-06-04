@@ -16,8 +16,18 @@ public interface FriendsRepository extends PagingAndSortingRepository<Friends, L
 	 * フレンド情報の検索を行う。
 	 * ログインIDを指定し、フレンド情報を検索する。
 	 *
-	 * @param usersId ユーザーID
+	 * @param usersId ユーザーテーブルのID
 	 * @return フレンド情報を返す。
 	 */
-	 Friends findByUsersId(String usersId);
+	 Friends findByUsersId(Long usersId);
+	 
+	 /**
+	  * フレンド情報の検索を行う。
+	  * ログインIDとフレンドIDを指定し、フレンド情報を検索する。
+	  * 
+	  * @param usersId
+	  * @param friendUsersId
+	  * @return
+	  */
+	 Friends findByUsersIdAndFriendUsersId(Long usersId, Long friendUsersId);
 }

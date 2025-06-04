@@ -148,12 +148,34 @@
 					<div class="card">
 						<div class="card-body profile-card pt-4 d-flex flex-column align-items-center">
 
-							<img th:src="(*{users.iconUri} ? ${@storageService.getDataUri(users.iconUri)} : '/assets/img/profile-img.jpg')"
+							<img th:src="(*{requestModifyAccount.iconUri} ? ${@storageService.getDataUri(requestModifyAccount.iconUri)} : '/assets/img/profile-img.jpg')"
 								alt="Profile" class="rounded-circle" style="width: 120px;">
-							<h2 th:text="${users.name}">佐藤太郎</h2>
-							<div class="social-links mt-2">
-								<form action="users-profile.jsp" method="post">
-									<button type="button" class="btn btn-primary rounded-pill">友達申請</button>
+							<h2 th:text="${requestModifyAccount.name}">佐藤太郎</h2>
+							<div class="social-links mt-2" th:if="${!isMyProfile}">
+								<form action="" method="post">
+									
+									<div th:if="${approvalStatus != null}" th:switch="${approvalStatus.name()}">
+										
+										<div th:case="APPLYING">
+											<button type="button" class="btn btn-primary rounded-pill">申請済み</button>
+										</div>
+										
+										<div th:case="APPROVAL_PENDING">
+											<button type="button" class="btn btn-primary rounded-pill">承認</button>
+											<button type="button" class="btn btn-primary rounded-pill">拒否</button>
+										</div>
+
+										<div th:case="AGREEMENT">
+											<button type="button" class="btn btn-primary rounded-pill disable">登録済み</button>
+											<button type="button" class="btn btn-primary rounded-pill disable">登録解除</button>
+										</div>
+
+										<div th:case="REJECTION">
+											<button type="submit" class="btn btn-primary rounded-pill">申請</button>
+										</div>
+										
+									</div>
+									
 								</form>
 							</div>
 						</div>
@@ -169,44 +191,36 @@
 										data-bs-target="#profile-overview">基本データ</button>
 								</li>
 
-								<li class="nav-item">
+								<li class="nav-item" th:if="${isMyProfile}">
 									<button class="nav-link" data-bs-toggle="tab"
 										data-bs-target="#profile-edit">プロフィール編集</button>
 								</li>
 
-								<li class="nav-item">
+								<li class="nav-item" th:if="${isMyProfile}">
 									<button class="nav-link" data-bs-toggle="tab"
 										data-bs-target="#profile-change-password">パスワード変更</button>
 								</li>
-
 							</ul>
 							<div class="tab-content pt-2">
 
 								<div class="tab-pane fade show active profile-overview" id="profile-overview">
 									<h5 class="card-title">自己紹介</h5>
-									<p class="small fst-italic" th:value="${requestModifyAccount.about}">
-										はじめまして、佐藤太郎と申します。私は、大手銀行の投資部門で働いています。投資に対する深い知識と経験を持ち、
-										顧客に最適な投資プランを提供することができます。
-										<br>
-										<br>
-										また、ビジネスに対する専門知識も持っており、クライアントのビジネス成長をサポートすることもできます。
-										趣味は旅行とゴルフです。世界中を旅して、新しい文化や人々と出会うことが私の楽しみです。
-										<br>
-										<br>
-										また、週末はゴルフ場で友人とプレーすることもあります。私の信念は、自己研鑽とお客様の満足度の向上に努めることです。
-										どうぞよろしくお願いいたします。
+									<p class="small fst-italic" 
+										th:text="${#strings.isEmpty(requestModifyAccount.about)} 
+										? '自己紹介文がありません。' 
+										: ${requestModifyAccount.about}">
 									</p>
 
 									<h5 class="card-title">プロフィール</h5>
 
 									<div class="row">
 										<div class="col-lg-3 col-md-4 label ">名前</div>
-										<div class="col-lg-9 col-md-8" th:text="${users.name}">佐藤太郎</div>
+										<div class="col-lg-9 col-md-8" th:text="${requestModifyAccount.name}">佐藤太郎</div>
 									</div>
 
 									<div class="row">
 										<div class="col-lg-3 col-md-4 label">メールアドレス</div>
-										<div class="col-lg-9 col-md-8" th:text="${users.emailAddress}">tsato@dcworks.jp
+										<div class="col-lg-9 col-md-8" th:text="${requestModifyAccount.emailAddress}">tsato@dcworks.jp
 										</div>
 									</div>
 
@@ -263,14 +277,7 @@
 											<label for="about" class="col-md-4 col-lg-4 col-form-label">自己紹介</label>
 											<div class="col-md-8 col-lg-8">
 												<textarea class="form-control" id="about" style="height: 100px"
-													th:field="*{about}">はじめまして、佐藤太郎と申します。私は、大手銀行の投資部門で働いています。投資に対する深い知識と経験を持ち、
-顧客に最適な投資プランを提供することができます。
-
-また、ビジネスに対する専門知識も持っており、クライアントのビジネス成長をサポートすることもできます。
-趣味は旅行とゴルフです。世界中を旅して、新しい文化や人々と出会うことが私の楽しみです。
-
-また、週末はゴルフ場で友人とプレーすることもあります。私の信念は、自己研鑽とお客様の満足度の向上に努めることです。
-どうぞよろしくお願いいたします。</textarea>
+													th:field="*{about}">ここに自己紹介文が入ります。</textarea>
 											</div>
 										</div>
 
