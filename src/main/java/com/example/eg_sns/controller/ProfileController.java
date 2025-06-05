@@ -18,10 +18,8 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.util.StringUtils;
 
-import com.example.eg_sns.constants.AppConstants;
 import com.example.eg_sns.core.annotation.LoginCheck;
 import com.example.eg_sns.dto.RequestModifyAccount;
-import com.example.eg_sns.entity.Friends;
 import com.example.eg_sns.entity.Users;
 import com.example.eg_sns.service.FriendsService;
 import com.example.eg_sns.service.StorageService;
@@ -107,47 +105,11 @@ public class ProfileController extends AppController {
 			log.warn("自分のログインIDのページが指定されました。");
 			isMyProfile = true;
 		} else {
-			log.warn("他者のログインIDのページが指定されました。");
-			log.warn("フレンド情報を検索します。");
-			Friends friend = friendsService.findFriends(loginUsersId, targetUsersId);
-			log.info("friend：{}", friend);
+			log.info("他者のログインIDのページが指定されました。");
+			log.info("承認ステータス判定処理を呼びます。");
+			approvalStatus as = friendsService.usersIds2ApprovalStatus(loginUsersId, targetUsersId);
 
-			// TODO: ▼▼▼承認ステータス判定の処理を切り出す▼▼▼
-			// デフォルトはリジェクトとし、友達申請ボタンが表示されている状態。拒否したときも同様の表示である。
-			approvalStatus as = approvalStatus.REJECTION;
-			if (friend != null) {
-				// 申請履歴がある
-
-				switch (friend.getApprovalStatus()) {
-
-				// 申請ボタン押下(自分) 申請済み画面
-				case AppConstants.APPLYING:
-					// 申請済みの表示
-					as = approvalStatus.APPLYING;
-					break;
-
-				// 申請ボタン押下された(相手)
-				case AppConstants.APPROVAL_PENDING:
-					// 承認(申請中の表示) [承認 or 拒否の待機画面]
-					as = approvalStatus.APPROVAL_PENDING;
-					break;
-
-				// 承認ボタン押下(相手)
-				case AppConstants.APPROVAL, AppConstants.AGREEMENT:
-					// 承諾(フレンドになった表示で登録解除できるボタンの表示)
-					as = approvalStatus.AGREEMENT;
-					break;
-
-				// 拒否ボタン押下(相手)
-				case AppConstants.REJECTION, AppConstants.DISMISSAL:
-					// 拒否(申請ボタンを表示)(初期値と同じ)
-					as = approvalStatus.REJECTION;
-					break;
-				}
-			}
-			// TODO: ▲▲▲ここまで切り出す▲▲▲
-
-			log.info("approvalStatus：{}", as);
+			log.info("承認ステータスを格納します。approvalStatus：{}", as);
 			model.addAttribute("approvalStatus", as); // 承認ステータス
 		}
 
@@ -156,7 +118,17 @@ public class ProfileController extends AppController {
 
 		return "profile/index";
 	}
-
+	
+	/**
+	 * [POST]ユーザー毎のプロフィール画面のアクション。
+	 * 
+	 * @param model 入力フォームのオブジェクト
+	 */
+	@PostMapping("/{targetLoginId}")
+	public String apply() {
+		return "profile/index";
+	}
+	
 	/**
 	 * [POST]アカウント編集アクション。
 	 *
@@ -234,15 +206,4 @@ public class ProfileController extends AppController {
 		usersService.save(users);
 		return "redirect:/profile";
 	}
-
-	//	@PostMapping("/apply")
-	//	public String apply(@Validated @ModelAttribute RequestFriend requestFriend,
-	//			BindingResult result,  // BindingResultがバリデーション対象の直後にないとバリデーション結果として認識されない。
-	//		    @RequestParam(FRIEND_USERS_ID) Long friendUsersId,
-	//		    @RequestParam(ACTION2) String action,
-	//			RedirectAttributes redirectAttributes) {
-	//		log.info("フレンド登録・更新処理のアクションが呼ばれました。：requestFriend={}, result={}", requestFriend, result);
-	//		log.info("usersId={}, friendUsersId={}", usersId, friendUsersId);
-	//		return "";
-	//	}
 }
