@@ -44,6 +44,7 @@ public class ProfileController extends AppController {
 	private static final String TARGET_LOGIN_ID = "targetLoginId";
 	private static final String USERS_ID = "usersId";
 	private static final String FRIEND_USERS_ID = "friendUsersId";
+	private static final String FRIEND_USERS_LOGIN_ID = "friendUsersLoginId";
 	private static final String ACTION2 = "action";
 	
 	/** ファイルアップロード関連サービスクラス。 */
@@ -136,6 +137,7 @@ public class ProfileController extends AppController {
 			BindingResult result, // BindingResultがバリデーション対象の直後にないとバリデーション結果として認識されない。
 			@RequestParam(USERS_ID) Long usersId,
 			@RequestParam(FRIEND_USERS_ID) Long friendUsersId,
+			@RequestParam(FRIEND_USERS_LOGIN_ID) String friendUsersLoginId,
 			@RequestParam(ACTION2) String action,
 			RedirectAttributes redirectAttributes) {
 		log.info("フレンド登録・更新処理のアクションが呼ばれました。：requestFriend={}, result={}", requestFriend, result);
@@ -163,7 +165,8 @@ public class ProfileController extends AppController {
 
 		// 不正アクセス防止のため、正常アクセスの時は"true"を入れる。
 		redirectAttributes.addFlashAttribute("isSuccess", "true");
-		return "redirect:/profile/{friendUsersId}";
+		redirectAttributes.addAttribute("friendUsersLoginId", friendUsersLoginId);
+		return "redirect:/profile/{friendUsersLoginId}";
 	}
 	/**
 	 * [POST]アカウント編集アクション。

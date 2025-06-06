@@ -44,7 +44,7 @@
 										<th scope="row"><img src="/assets/img/news-1.jpg" alt="" style="width: 80px;"
 												th:src="*{iconUri}">
 										</th>
-										<td><a href="/profile/" th:text="*{name}">〇〇</a></td>
+										<td><a th:href="@{'/profile/' + *{loginId}}" th:text="*{name}">〇〇</a></td>
 										<td class="pre-wrap" th:text="*{about}">
 											こんにちは、〇〇と申します。
 										</td>

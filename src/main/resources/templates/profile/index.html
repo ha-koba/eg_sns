@@ -156,6 +156,7 @@
 
 									<input type="hidden" name="usersId" th:value="${loginUsers.id}">
 									<input type="hidden" name="friendUsersId" th:value="${requestModifyAccount.id}">
+									<input type="hidden" name="friendUsersLoginId" th:value="${requestModifyAccount.loginId}">
 
 									<div th:if="${approvalStatus != null}" th:switch="${approvalStatus.name()}">
 
