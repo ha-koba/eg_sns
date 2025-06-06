@@ -156,13 +156,14 @@
 
 									<input type="hidden" name="usersId" th:value="${loginUsers.id}">
 									<input type="hidden" name="friendUsersId" th:value="${requestModifyAccount.id}">
-									<input type="hidden" name="friendUsersLoginId" th:value="${requestModifyAccount.loginId}">
+									<input type="hidden" name="friendUsersLoginId"
+										th:value="${requestModifyAccount.loginId}">
 
 									<div th:if="${approvalStatus != null}" th:switch="${approvalStatus.name()}">
 
 										<div th:case="APPLYING">
 											<span class="btn rounded-pill text-bg-secondary" style="opacity:0.7;">
-											  <i class="bi bi-check-circle-fill" style="margin-right:0.3em;"></i>申請済み
+												<i class="bi bi-check-circle-fill" style="margin-right:0.3em;"></i>申請済み
 											</span>
 										</div>
 
@@ -175,10 +176,9 @@
 
 										<div th:case="AGREEMENT">
 											<span class="btn rounded-pill text-bg-secondary" style="opacity:0.7;">
-											  <i class="bi bi-check-circle-fill" style="margin-right:0.3em;"></i>登録済み
+												<i class="bi bi-check-circle-fill" style="margin-right:0.3em;"></i>登録済み
 											</span>
-											<button type="submit"
-												class="btn btn-danger rounded-pill" name="action"
+											<button type="submit" class="btn btn-danger rounded-pill" name="action"
 												value="reject">登録解除</button>
 										</div>
 
