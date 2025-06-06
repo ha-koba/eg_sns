@@ -33,15 +33,15 @@ import lombok.extern.log4j.Log4j2;
 @Controller
 @RequestMapping("/")
 public class LoginController {
-	
+
 	/** セッション情報。 */
 	@Autowired
 	private HttpSession session;
-	
+
 	/** ユーザー関連サービスクラス。 */
 	@Autowired
 	private UsersService usersService;
-	
+
 	/**
 	 * [GET]ログインフォームのアクション。
 	 *
@@ -66,7 +66,7 @@ public class LoginController {
 
 		return "login/index";
 	}
-	
+
 	/**
 	 * [POST]ログインアクション。
 	 *
@@ -78,7 +78,7 @@ public class LoginController {
 	public String login(@Validated @ModelAttribute RequestLogin requestLogin,
 			BindingResult result,
 			RedirectAttributes redirectAttributes) {
-		
+
 		log.info("ログイン処理のアクションが呼ばれました");
 
 		// バリデーション。
@@ -95,7 +95,7 @@ public class LoginController {
 					.map(error -> error.getDefaultMessage())
 					.collect(Collectors.toList());
 			redirectAttributes.addFlashAttribute("errorMessages", messages);
-			
+
 			// ログイン画面へリダイレクト。
 			return "redirect:/";
 		}
@@ -103,14 +103,14 @@ public class LoginController {
 		// ログインIDとパスワードを取得。
 		String loginId = (String) requestLogin.getLoginId();
 		String password = (String) requestLogin.getPassword();
-		
+
 		// ユーザー検索を行う。
 		Users users = (Users) usersService.findUsers(loginId, password);
-		
+
 		// ユーザーが取得できなかったら、ログインエラー。
 		if (users == null) {
 			log.warn("ログインに失敗しました。: requestLogin={}", requestLogin);
-			
+
 			//エラーメッセージをセット。
 			result.rejectValue("loginId", StringUtil.BLANK, "ログインに失敗しました。入力内容をご確認の上、再度ログインしてください。");
 
@@ -123,19 +123,19 @@ public class LoginController {
 					.map(error -> error.getDefaultMessage())
 					.collect(Collectors.toList());
 			redirectAttributes.addFlashAttribute("errorMessages", messages);
-			
+
 			// ログイン画面へリダイレクト。
 			return "redirect:/";
 		}
-		
+
 		// ログインに成功したら、ログイン情報をセッションに保持。
 		session.setAttribute(AppConst.SESSION_KEY_LOGIN_INFO, users);
 
 		// ホーム画面へリダイレクト。
 		return "redirect:/home";
-		
+
 	}
-	
+
 	/**
 	 * [GET]ログアウトアクション。
 	 */
@@ -149,23 +149,3 @@ public class LoginController {
 		return "redirect:/";
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

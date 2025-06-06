@@ -48,14 +48,14 @@ public class FriendController extends AppController {
 
 		model.addAttribute("loginUsers", loginUsers);
 		model.addAttribute("usersList", usersList); // TODO: 後で削除
-		
+
 		// フレンドユーザーとその承認ステータスをセットで保存するリスト
 		List<UsersAndApprovalStatus> usersAndStatusList = friendsService.getUsersAndApprovalStatus(usersList, loginUsersId);
 		
 		// ログインユーザーを取り除く処理
 		List<UsersAndApprovalStatus> filteredUsers = usersAndStatusList.stream()
-			    .filter(user -> !user.getUsers().getId().equals(loginUsersId))
-			    .collect(Collectors.toList());
+				.filter(user -> !user.getUsers().getId().equals(loginUsersId))
+				.collect(Collectors.toList());
 		model.addAttribute("usersAndStatusList", filteredUsers);
 		return "friend/list";
 	}
@@ -67,7 +67,7 @@ public class FriendController extends AppController {
 			@RequestParam(FRIEND_USERS_ID) Long friendUsersId,
 			@RequestParam(ACTION2) String action,
 			RedirectAttributes redirectAttributes) {
-		
+
 		log.info("フレンド登録・更新処理のアクションが呼ばれました。：requestFriend={}, result={}", requestFriend, result);
 		log.info("usersId={}, friendUsersId={}", usersId, friendUsersId);
 
@@ -82,7 +82,7 @@ public class FriendController extends AppController {
 		// フレンドDBのユーザーIDカラムに、ログイン中のユーザーIDが存在するか確認。
 		Friends uFriends = friendsService.findFriends(usersId, friendUsersId);
 		Friends fFriends = friendsService.findFriends(friendUsersId, usersId);
-		
+
 		// 申請 or 承認 or 却下 / 自分 or 他人。
 		uFriends = friendsService.createOrUpdateFriends(usersId, friendUsersId, action, uFriends, true);
 		fFriends = friendsService.createOrUpdateFriends(friendUsersId, usersId, action, fFriends, false);

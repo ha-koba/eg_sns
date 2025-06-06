@@ -87,7 +87,7 @@ public class StorageService {
 	public static boolean isImageFile(MultipartFile multipartFile) {
 		// ファイル名取得
 		String fileName = multipartFile.getOriginalFilename();
-		
+
 		if (StringUtils.isEmpty(fileName)) {
 			// 画像ファイル名称が取得できない場合は、デフォルト画像を設定するため「true」を返す。
 			return true;
@@ -125,7 +125,7 @@ public class StorageService {
 			}
 		}
 	}
-	
+
 	// TODO: 画像のファイルアップロードサイズでエラーを出力する
 
 	/**

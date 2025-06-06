@@ -42,11 +42,11 @@ public class Users extends EntityBase {
 	/** メールアドレス */
 	@Column(name = "email_address", nullable = true)
 	private String emailAddress;
-	
+
 	/** プロフィールアイコンURI */
 	@Column(name = "icon_uri", nullable = true)
 	private String iconUri;
-	
+
 	/** 自己紹介 */
 	@Column(name = "about", nullable = true)
 	private String about;

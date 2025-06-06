@@ -34,7 +34,7 @@ public class Friends extends EntityBase {
 	/** フレンドリクエストを受信したユーザーのID (外部キー) */
 	@Column(name = "friend_users_id", nullable = false)
 	private Long friendUsersId;
-	
+
 	/** 承認ステータス */
 	@Column(name = "approval_status", nullable = false)
 	private int approvalStatus;

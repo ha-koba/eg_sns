@@ -18,7 +18,7 @@ public class RequestFriend extends DtoBase {
 
 	/** フレンドリクエストを受信したユーザーのID (外部キー) */
 	private Long friendUsersId;
-	
+
 	/** 承認ステータス */
 	private int approval_status;
 }

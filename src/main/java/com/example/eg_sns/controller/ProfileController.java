@@ -46,7 +46,7 @@ public class ProfileController extends AppController {
 	private static final String FRIEND_USERS_ID = "friendUsersId";
 	private static final String FRIEND_USERS_LOGIN_ID = "friendUsersLoginId";
 	private static final String ACTION2 = "action";
-	
+
 	/** ファイルアップロード関連サービスクラス。 */
 	@Autowired
 	private StorageService storageService;
@@ -107,7 +107,7 @@ public class ProfileController extends AppController {
 		boolean isMyProfile = false;
 		// 承認ステータス
 		approvalStatus as = null;
-		
+
 		// 呼ばれたページが自身のユーザーIDと一致するならtrue
 		if (targetUsersId.equals(loginUsersId)) {
 			log.warn("自分のログインIDのページが指定されました。");
@@ -126,7 +126,7 @@ public class ProfileController extends AppController {
 
 		return "profile/index";
 	}
-	
+
 	/**
 	 * [POST]ユーザー毎のプロフィール画面のアクション。
 	 * 
@@ -154,7 +154,7 @@ public class ProfileController extends AppController {
 		// フレンドDBのユーザーIDカラムに、ログイン中のユーザーIDが存在するか確認。
 		Friends uFriends = friendsService.findFriends(usersId, friendUsersId);
 		Friends fFriends = friendsService.findFriends(friendUsersId, usersId);
-		
+
 		// 承認 or 却下。
 		uFriends = friendsService.createOrUpdateFriends(usersId, friendUsersId, action, uFriends, true);
 		fFriends = friendsService.createOrUpdateFriends(friendUsersId, usersId, action, fFriends, false);
@@ -168,6 +168,7 @@ public class ProfileController extends AppController {
 		redirectAttributes.addAttribute("friendUsersLoginId", friendUsersLoginId);
 		return "redirect:/profile/{friendUsersLoginId}";
 	}
+
 	/**
 	 * [POST]アカウント編集アクション。
 	 *

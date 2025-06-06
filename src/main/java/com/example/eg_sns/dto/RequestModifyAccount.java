@@ -19,7 +19,7 @@ public class RequestModifyAccount extends DtoBase {
 	@NotBlank(message = "お名前を入力してください。")
 	@Size(max = 32, message = "お名前は最大32文字です。")
 	private String name;
-	
+
 	/** メールアドレス */
 	@NotBlank(message = "メールアドレスを入力してください。")
 	@Size(max = 32, message = "メールアドレスは最大32文字です。")
