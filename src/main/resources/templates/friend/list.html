@@ -38,23 +38,53 @@
 										<th scope="col">承認ステータス</th>
 									</tr>
 								</thead>
-								<tbody>
-									<tr th:each="users: ${usersList}">
+								<tbody th:each="usersAndStatus: ${usersAndStatusList}">
+									
+									<tr th:object="${usersAndStatus.getUsers()}" th:if="*{id != loginUsers.id}">
 										<th scope="row"><img src="/assets/img/news-1.jpg" alt="" style="width: 80px;"
-												th:src="${users.iconUri}">
+												th:src="*{iconUri}">
 										</th>
-										<td><a href="/profile/" th:text="${users.name}">〇〇</a></td>
-										<td class="pre-wrap" th:text="${users.about}">
+										<td><a href="/profile/" th:text="*{name}">〇〇</a></td>
+										<td class="pre-wrap" th:text="*{about}">
 											こんにちは、〇〇と申します。
 										</td>
 										<td>
 											<form th:action="@{/friend/process}" method="post">
+
 												<input type="hidden" name="usersId" th:value="${loginUsers.id}">
-												<input type="hidden" name="friendUsersId" th:value="${users.id}">
-												<button type="submit" class="btn btn-primary rounded-pill" name="action"
-													value="approve">承認</button>&nbsp;<button type="submit"
-													class="btn btn-danger rounded-pill" name="action"
-													value="reject">却下</button>
+												<input type="hidden" name="friendUsersId" th:value="*{id}">
+
+												<div th:if="${usersAndStatus.getApprovalStatus != null}" th:switch="${usersAndStatus.getApprovalStatus.name}">
+
+													<div th:case="APPLYING">
+														<span class="btn rounded-pill text-bg-secondary" style="opacity:0.7;">
+														  <i class="bi bi-check-circle-fill" style="margin-right:0.3em;"></i>申請済み
+														</span>
+													</div>
+													
+													<div th:case="APPROVAL_PENDING">
+														<button type="submit" class="btn btn-primary rounded-pill" name="action"
+															value="approve">承認</button>&nbsp;<button type="submit"
+															class="btn btn-danger rounded-pill" name="action"
+															value="reject">却下</button>
+													</div>
+
+													<div th:case="AGREEMENT">
+														<span class="btn rounded-pill text-bg-secondary" style="opacity:0.7;">
+														  <i class="bi bi-check-circle-fill" style="margin-right:0.3em;"></i>登録済み
+														</span>
+														<button type="submit"
+															class="btn btn-danger rounded-pill" name="action"
+															value="reject">登録解除</button>
+													</div>
+
+													<div th:case="REJECTION">
+														<button type="submit" class="btn btn-primary rounded-pill" name="action"
+															value="apply">申請</button>
+													</div>
+													
+												</div>
+												
 											</form>
 										</td>
 									</tr>

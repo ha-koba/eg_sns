@@ -1,6 +1,7 @@
 package com.example.eg_sns.controller;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.example.eg_sns.constants.UsersAndApprovalStatus;
 import com.example.eg_sns.dto.RequestFriend;
 import com.example.eg_sns.entity.Friends;
 import com.example.eg_sns.entity.Users;
@@ -41,8 +43,20 @@ public class FriendController extends AppController {
 	public String list(Model model) {
 		// 全ユーザー情報の取得(プロフィール画像、名前、自己紹介、承認ステータス）
 		List<Users> usersList = usersService.findAllUsers();
-		model.addAttribute("loginUsers", getUsers());
-		model.addAttribute("usersList", usersList);
+		Users loginUsers = getUsers();
+		Long loginUsersId = loginUsers.getId();
+
+		model.addAttribute("loginUsers", loginUsers);
+		model.addAttribute("usersList", usersList); // TODO: 後で削除
+		
+		// フレンドユーザーとその承認ステータスをセットで保存するリスト
+		List<UsersAndApprovalStatus> usersAndStatusList = friendsService.getUsersAndApprovalStatus(usersList, loginUsersId);
+		
+		// ログインユーザーを取り除く処理
+		List<UsersAndApprovalStatus> filteredUsers = usersAndStatusList.stream()
+			    .filter(user -> !user.getUsers().getId().equals(loginUsersId))
+			    .collect(Collectors.toList());
+		model.addAttribute("usersAndStatusList", filteredUsers);
 		return "friend/list";
 	}
 
@@ -53,6 +67,7 @@ public class FriendController extends AppController {
 			@RequestParam(FRIEND_USERS_ID) Long friendUsersId,
 			@RequestParam(ACTION2) String action,
 			RedirectAttributes redirectAttributes) {
+		
 		log.info("フレンド登録・更新処理のアクションが呼ばれました。：requestFriend={}, result={}", requestFriend, result);
 		log.info("usersId={}, friendUsersId={}", usersId, friendUsersId);
 
@@ -67,48 +82,10 @@ public class FriendController extends AppController {
 		// フレンドDBのユーザーIDカラムに、ログイン中のユーザーIDが存在するか確認。
 		Friends uFriends = friendsService.findFriends(usersId, friendUsersId);
 		Friends fFriends = friendsService.findFriends(friendUsersId, usersId);
-
-//		if (uFriends == null) {
-//			// TODO: 新規作成せず、エラーのみにする。
-//			// もし存在しないなら例外エラーを出す。
-//			log.warn("uFriendsは更新するフレンドレコードが存在しないです。");
-//			log.info("フレンドレコードを新しく作成します。");
-//			uFriends = new Friends();
-//
-//			// ユーザー情報(自分)をセット。
-//			uFriends.setUsersId(usersId);
-//			uFriends.setFriendUsersId(friendUsersId);
-//		}
-//
-//		if (fFriends == null) {
-//			// TODO: 新規作成せず、エラーのみにする。
-//			// もし存在しないなら例外エラーを出す。
-//			log.warn("fFriendsは更新するフレンドレコードが存在しないです。");
-//			log.info("フレンドレコードを新しく作成します。");
-//			fFriends = new Friends();
-//
-//			// ユーザー情報(相手)をセット。
-//			fFriends.setUsersId(friendUsersId);
-//			fFriends.setFriendUsersId(usersId);
-//		}
 		
-		// 承認 or 却下。
+		// 申請 or 承認 or 却下 / 自分 or 他人。
 		uFriends = friendsService.createOrUpdateFriends(usersId, friendUsersId, action, uFriends, true);
 		fFriends = friendsService.createOrUpdateFriends(friendUsersId, usersId, action, fFriends, false);
-		
-//		if ("approve".equals(action)) {
-//			// 承認処理
-//			log.info("承認処理が呼ばれました。", action, uFriends, fFriends, requestFriend, result, usersId, friendUsersId);
-//			uFriends.setApprovalStatus(AppConstants.APPROVAL); // 3. 承認[自分]
-//			fFriends.setApprovalStatus(AppConstants.AGREEMENT); // 4. 承諾[相手]
-//		} else if ("reject".equals(action)) {
-//			// 却下処理
-//			log.info("却下処理が呼ばれました。", action, uFriends, fFriends, requestFriend, result, usersId, friendUsersId);
-//			uFriends.setApprovalStatus(AppConstants.REJECTION); // 5. 棄却[自分]
-//			fFriends.setApprovalStatus(AppConstants.DISMISSAL); // 6. 却下[相手]
-//		} else {
-//			log.warn("予期しない値を受信しました。action={}", action);
-//		}
 
 		// データ登録処理。
 		friendsService.save(uFriends);

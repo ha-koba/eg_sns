@@ -152,28 +152,38 @@
 								alt="Profile" class="rounded-circle" style="width: 120px;">
 							<h2 th:text="${requestModifyAccount.name}">佐藤太郎</h2>
 							<div class="social-links mt-2" th:if="${!isMyProfile}">
-								<form action="" method="post">
+								<form th:action="@{/profile/process}" method="post">
+
+									<input type="hidden" name="usersId" th:value="${loginUsers.id}">
+									<input type="hidden" name="friendUsersId" th:value="${requestModifyAccount.id}">
 
 									<div th:if="${approvalStatus != null}" th:switch="${approvalStatus.name()}">
 
 										<div th:case="APPLYING">
-											<button type="button" class="btn btn-primary rounded-pill">申請済み</button>
+											<span class="btn rounded-pill text-bg-secondary" style="opacity:0.7;">
+											  <i class="bi bi-check-circle-fill" style="margin-right:0.3em;"></i>申請済み
+											</span>
 										</div>
 
 										<div th:case="APPROVAL_PENDING">
-											<button type="button" class="btn btn-primary rounded-pill">承認</button>
-											<button type="button" class="btn btn-primary rounded-pill">拒否</button>
+											<button type="submit" class="btn btn-primary rounded-pill" name="action"
+												value="approve">承認</button>&nbsp;<button type="button"
+												class="btn btn-danger rounded-pill" name="action"
+												value="reject">却下</button>
 										</div>
 
 										<div th:case="AGREEMENT">
-											<button type="button"
-												class="btn btn-primary rounded-pill disable">登録済み</button>
-											<button type="button"
-												class="btn btn-primary rounded-pill disable">登録解除</button>
+											<span class="btn rounded-pill text-bg-secondary" style="opacity:0.7;">
+											  <i class="bi bi-check-circle-fill" style="margin-right:0.3em;"></i>登録済み
+											</span>
+											<button type="submit"
+												class="btn btn-danger rounded-pill" name="action"
+												value="reject">登録解除</button>
 										</div>
 
 										<div th:case="REJECTION">
-											<button type="submit" class="btn btn-primary rounded-pill">申請</button>
+											<button type="submit" class="btn btn-primary rounded-pill" name="action"
+												value="apply">申請</button>
 										</div>
 
 									</div>

@@ -1,11 +1,16 @@
 package com.example.eg_sns.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.example.eg_sns.constants.AppConstants;
+import com.example.eg_sns.constants.UsersAndApprovalStatus;
 import com.example.eg_sns.controller.ProfileController.approvalStatus;
 import com.example.eg_sns.entity.Friends;
+import com.example.eg_sns.entity.Users;
 import com.example.eg_sns.repository.FriendsRepository;
 
 import lombok.extern.log4j.Log4j2;
@@ -57,7 +62,7 @@ public class FriendsService {
 		log.info("フレンドを登録します。friends={}", friends);
 		repository.save(friends);
 	}
-	
+
 	/**
 	 * 指定された2人のユーザー間の承認ステータスを返す。
 	 * 
@@ -67,7 +72,7 @@ public class FriendsService {
 	 */
 	public approvalStatus usersIds2ApprovalStatus(Long usersId, Long friendUsersId) {
 		log.info("承認ステータス判定処理が呼ばれました。");
-		log.warn("フレンド情報を検索します。usersId={}, friendUsersId={}",usersId, friendUsersId);
+		log.warn("フレンド情報を検索します。usersId={}, friendUsersId={}", usersId, friendUsersId);
 		Friends friend = findFriends(usersId, friendUsersId);
 		log.info("検索結果。friend：{}", friend);
 		approvalStatus as = approvalStatus.REJECTION;
@@ -76,25 +81,25 @@ public class FriendsService {
 			log.info("friend.getApprovalstatus()={}", friend.getApprovalStatus());
 			switch (friend.getApprovalStatus()) {
 
-			// 申請ボタン押下(自分) 申請済み画面
+			// 1. 申請ボタン押下(自分) 申請済み画面
 			case AppConstants.APPLYING:
 				// 申請済みの表示
 				as = approvalStatus.APPLYING;
 				break;
 
-			// 申請ボタン押下された(相手)
+			// 2. 申請ボタン押下された(相手)
 			case AppConstants.APPROVAL_PENDING:
 				// 承認(申請中の表示) [承認 or 拒否の待機画面]
 				as = approvalStatus.APPROVAL_PENDING;
 				break;
 
-			// 承認ボタン押下(相手)
+			// 3. 4. 承認ボタン押下(相手)
 			case AppConstants.APPROVAL, AppConstants.AGREEMENT:
 				// 承諾(フレンドになった表示で登録解除できるボタンの表示)
 				as = approvalStatus.AGREEMENT;
 				break;
 
-			// 拒否ボタン押下(相手)
+			// 5. 6. 拒否ボタン押下(相手)
 			case AppConstants.REJECTION, AppConstants.DISMISSAL:
 				// 拒否(申請ボタンを表示)(初期値と同じ)
 				as = approvalStatus.REJECTION;
@@ -104,8 +109,9 @@ public class FriendsService {
 		log.info("承認ステータスはこちらでした。approvalStatus：{}", as);
 		return as;
 	}
-	
+
 	/**
+	 * フレンドを作成か更新をする
 	 * 
 	 * @param usersId: ユーザーID
 	 * @param friendUsersId: フレンドID
@@ -114,20 +120,22 @@ public class FriendsService {
 	 * @param isLoginUsers: 自身のレコードか(loginしている人のユーザーIDのレコードならtrue)
 	 * @return
 	 */
-	public Friends createOrUpdateFriends(Long usersId, Long friendUsersId, String action, Friends friends, boolean isLoginUsers) {
+	public Friends createOrUpdateFriends(Long usersId, Long friendUsersId, String action, Friends friends,
+			boolean isLoginUsers) {
 		// Create処理
 		if (friends == null) {
 			// もし存在しないなら新規作成
 			log.info("Create処理が呼ばれました。フレンドが存在しないため、フレンドインスタンスを新しく作成します。");
 			friends = new Friends();
-			
+
 			// ユーザー情報をセット。
 			friends.setUsersId(usersId);
 			friends.setFriendUsersId(friendUsersId);
 		}
-		
+
 		// Update処理
-		log.info("Update処理が呼ばれました。action={}, friends={}, usersId={}, friendUsersId={}", action, friends, usersId, friendUsersId);
+		log.info("Update処理が呼ばれました。action={}, friends={}, usersId={}, friendUsersId={}", action, friends, usersId,
+				friendUsersId);
 		int ac = AppConstants.DISMISSAL;
 		if ("apply".equals(action)) {
 			// 1. 申請中[自分] | 2. 承認待ち[相手]
@@ -150,7 +158,42 @@ public class FriendsService {
 		}
 		log.info("actionの判定結果 AppConstants ac={}", ac);
 		friends.setApprovalStatus(ac);
-		log.info("friendsにセットされたusersId={}, friendUsersId={}, ApprovalStatus={}", friends.getUsersId(), friends.getFriendUsersId(), ac);
+		log.info("friendsにセットされたusersId={}, friendUsersId={}, ApprovalStatus={}", friends.getUsersId(),
+				friends.getFriendUsersId(), ac);
 		return friends;
+	}
+
+	/**
+	 * フレンドユーザーとその承認ステータスをセットで保存したリストを返す。
+	 * ログインユーザーとフレンドユーザーが同一なことは考慮しない。
+	 * 後処理のコントローラーで制御することを前提とする。
+	 * 
+	 * @param allUsers: 全てのユーザーを格納したリスト
+	 * @param loginUsersId: 
+	 * @return
+	 */
+	public List<UsersAndApprovalStatus> getUsersAndApprovalStatus(List<Users> usersList, Long loginUsersId) {
+		// フレンドユーザーとその承認ステータスをセットで保存するリスト
+		List<UsersAndApprovalStatus> usersAndStatusList = new ArrayList<UsersAndApprovalStatus>();
+
+		// 各ユーザーのフレンド情報を取得して設定
+		usersList.forEach(friendUser -> {
+
+			// フレンドユーザー→フレンドのユーザーId
+			Long friendUsersId = friendUser.getId();
+			log.info("フレンドユーザー={}→フレンドのユーザーId={}", friendUser, friendUsersId);
+
+			// ログイン中のユーザーId, フレンドのユーザーId → 承認ステータス
+			approvalStatus as = usersIds2ApprovalStatus(loginUsersId, friendUsersId);
+			log.info("ログイン中のユーザーId={}, フレンドのユーザーId={} → 承認ステータス={}", loginUsersId, friendUsersId, as);
+
+			// フレンド, 承認ステータス → セット化
+			UsersAndApprovalStatus uaas = new UsersAndApprovalStatus(friendUser, as);
+			log.info("フレンド{}, 承認ステータス={} → 承認ステータス={}", friendUser, as, uaas);
+
+			// フレンドと承認ステータスのセットをリストに入れる
+			usersAndStatusList.add(uaas);
+		});
+		return usersAndStatusList;
 	}
 }

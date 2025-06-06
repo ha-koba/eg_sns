@@ -19,7 +19,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.thymeleaf.util.StringUtils;
 
 import com.example.eg_sns.core.annotation.LoginCheck;
+import com.example.eg_sns.dto.RequestFriend;
 import com.example.eg_sns.dto.RequestModifyAccount;
+import com.example.eg_sns.entity.Friends;
 import com.example.eg_sns.entity.Users;
 import com.example.eg_sns.service.FriendsService;
 import com.example.eg_sns.service.StorageService;
@@ -40,7 +42,10 @@ import lombok.extern.log4j.Log4j2;
 public class ProfileController extends AppController {
 
 	private static final String TARGET_LOGIN_ID = "targetLoginId";
-
+	private static final String USERS_ID = "usersId";
+	private static final String FRIEND_USERS_ID = "friendUsersId";
+	private static final String ACTION2 = "action";
+	
 	/** ファイルアップロード関連サービスクラス。 */
 	@Autowired
 	private StorageService storageService;
@@ -99,7 +104,9 @@ public class ProfileController extends AppController {
 
 		// 自身のプロフィールページか
 		boolean isMyProfile = false;
-
+		// 承認ステータス
+		approvalStatus as = null;
+		
 		// 呼ばれたページが自身のユーザーIDと一致するならtrue
 		if (targetUsersId.equals(loginUsersId)) {
 			log.warn("自分のログインIDのページが指定されました。");
@@ -107,14 +114,14 @@ public class ProfileController extends AppController {
 		} else {
 			log.info("他者のログインIDのページが指定されました。");
 			log.info("承認ステータス判定処理を呼びます。");
-			approvalStatus as = friendsService.usersIds2ApprovalStatus(loginUsersId, targetUsersId);
-
-			log.info("承認ステータスを格納します。approvalStatus：{}", as);
-			model.addAttribute("approvalStatus", as); // 承認ステータス
+			as = friendsService.usersIds2ApprovalStatus(loginUsersId, targetUsersId);
 		}
 
+		log.info("承認ステータスを格納します。approvalStatus：{}", as);
+		model.addAttribute("approvalStatus", as); // 承認ステータス
 		model.addAttribute("isMyProfile", isMyProfile); // 自身のプロフィールではない画面
 		model.addAttribute("requestModifyAccount", targetUser); // TODO: プロフィールは編集できないようにしたいため初期化
+		model.addAttribute("loginUsers", getUsers());
 
 		return "profile/index";
 	}
@@ -124,11 +131,40 @@ public class ProfileController extends AppController {
 	 * 
 	 * @param model 入力フォームのオブジェクト
 	 */
-	@PostMapping("/{targetLoginId}")
-	public String apply() {
-		return "profile/index";
+	@PostMapping("/process")
+	public String process(@Validated @ModelAttribute RequestFriend requestFriend,
+			BindingResult result, // BindingResultがバリデーション対象の直後にないとバリデーション結果として認識されない。
+			@RequestParam(USERS_ID) Long usersId,
+			@RequestParam(FRIEND_USERS_ID) Long friendUsersId,
+			@RequestParam(ACTION2) String action,
+			RedirectAttributes redirectAttributes) {
+		log.info("フレンド登録・更新処理のアクションが呼ばれました。：requestFriend={}, result={}", requestFriend, result);
+		log.info("usersId={}, friendUsersId={}", usersId, friendUsersId);
+
+		// バリデーション。
+		if (result.hasErrors()) {
+			// TODO: 一旦ログの表示のみ
+			// ボタンを押した時にそのユーザーが削除されているケースなどが考えられる
+			log.warn("バリデーションエラーが発生しました。 requestFriend={}, result={}", requestFriend, result);
+			return "redirect:/friend/list";
+		}
+
+		// フレンドDBのユーザーIDカラムに、ログイン中のユーザーIDが存在するか確認。
+		Friends uFriends = friendsService.findFriends(usersId, friendUsersId);
+		Friends fFriends = friendsService.findFriends(friendUsersId, usersId);
+		
+		// 承認 or 却下。
+		uFriends = friendsService.createOrUpdateFriends(usersId, friendUsersId, action, uFriends, true);
+		fFriends = friendsService.createOrUpdateFriends(friendUsersId, usersId, action, fFriends, false);
+
+		// データ登録処理。
+		friendsService.save(uFriends);
+		friendsService.save(fFriends);
+
+		// 不正アクセス防止のため、正常アクセスの時は"true"を入れる。
+		redirectAttributes.addFlashAttribute("isSuccess", "true");
+		return "redirect:/profile/{friendUsersId}";
 	}
-	
 	/**
 	 * [POST]アカウント編集アクション。
 	 *
