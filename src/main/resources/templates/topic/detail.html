@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ja" xmlns:th="http://www.thymeleaf.org">
+
+<!-- ======= Head ======= -->
+<div th:replace="~{common/shoulder_fragment::head(title = 'SNSサイト - トピック詳細')}"></div>
+
+<body>
+
+	<!-- ======= Header ======= -->
+	<div th:replace="~{common/shoulder_fragment::header}"></div>
+
+	<main id="main" class="main">
+
+		<div class="pagetitle">
+			<h1>トピック</h1>
+			<nav>
+				<ol class="breadcrumb">
+					<li class="breadcrumb-item"><a href="/home/">Home</a></li>
+					<li class="breadcrumb-item">トピック</li>
+				</ol>
+			</nav>
+		</div><!-- End Page Title -->
+
+		<section class="section">
+			<div class="row">
+				<div class="col-lg-12">
+
+					<div th:if="${isSuccess == true}" class="alert alert-success alert-dismissible fade show"
+						role="alert">
+						<div>
+							<i class="bi bi-check-circle me-1"></i>
+							トピックを投稿しました。
+							<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+						</div>
+					</div>
+
+					<div class="card">
+						<div class="card-body">
+							<h5 class="card-title">[[${topics.title}]]<span> / [[${topics.users.name}]]</span></h5>
+							<span th:utext="${@stringUtil.nl2br(topics.body)}"></span>
+						</div>
+						<div class="card-footer" th:if="${users.id == topics.users.id}">
+							<form action="pages-input.html">
+								<div class="row mb-3">
+									<div class="col-sm-4">
+										<a th:href="@{/topic/delete/{topicsId}(topicsId=${topics.id})}"
+											class="btn btn-danger">削除する</a>
+									</div>
+								</div>
+							</form><!-- End General Form Elements -->
+						</div>
+					</div>
+
+					<div class="card">
+						<div class="card-body">
+							<h5 class="card-title">コメント</h5>
+
+							<div th:if="${validationErrors != null}"
+								class="alert alert-danger alert-dismissible fade show" role="alert">
+								<div th:each="error : ${validationErrors.getAllErrors()}">
+									<i class="bi bi-exclamation-octagon me-1"></i>
+									<span th:text="${error.getDefaultMessage()}">エラーメッセージ</span>
+								</div>
+								<button type="button" class="btn-close" data-bs-dismiss="alert"
+									aria-label="Close"></button>
+							</div>
+
+							<!-- General Form Elements -->
+							<form method="post" th:action="@{/topic/comment/regist/{id}(id=${topics.id})}"
+								th:object="${requestTopicComment}">
+								<div class="row mb-3">
+									<label for="inputPassword" class="col-sm-2 col-form-label">本文</label>
+									<div class="col-sm-10">
+										<textarea class="form-control" name="body" style="height: 100px"
+											th:field="*{body}"></textarea>
+									</div>
+								</div>
+
+								<div class="row mb-3">
+									<label class="col-sm-2 col-form-label"></label>
+									<div class="col-sm-10">
+										<button type="submit" class="btn btn-primary">コメントする</button>
+									</div>
+								</div>
+							</form><!-- End General Form Elements -->
+
+						</div>
+					</div>
+
+					<div class="card" th:each="comments:${topics.commentsList}">
+						<div class="card-body">
+							<h5 class="card-title"><span>[[${comments.users.name}]]</span></h5>
+							<span th:utext="${@stringUtil.nl2br(comments.body)}"></span>
+						</div>
+						<div class="card-footer" th:if="${users.id == comments.users.id}">
+							<div class="row mb-3">
+								<div class="col-sm-4">
+									<a th:href="@{/topic/comment/delete/{topicsId}/{commentsId}(topicsId=${topics.id}, commentsId=${comments.id})}"
+										class="btn btn-danger">削除する</a>
+								</div>
+							</div>
+						</div>
+					</div>
+
+				</div>
+			</div>
+		</section>
+
+	</main><!-- End #main -->
+
+	<!-- ======= Footer ======= -->
+	<div th:replace="~{common/shoulder_fragment::footer}"></div>
+
+</body>
+
+</html>
