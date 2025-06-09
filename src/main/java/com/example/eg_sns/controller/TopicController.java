@@ -96,7 +96,7 @@ public class TopicController extends AppController {
 	}
 
 	/**
-	 * [POST]トピック詳細アクション。
+	 * [GET]トピック詳細アクション。
 	 *
 	 * @param topicsId トピックID
 	 * @param isSuccess コメント投稿完了からの正常の遷移であるか、否か。（true.正常）

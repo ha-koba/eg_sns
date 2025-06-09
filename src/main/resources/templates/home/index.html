@@ -150,30 +150,38 @@
 						<div class="card-body">
 							<h5 class="card-title">今の気持ちをシェアしよう！</h5>
 
-							<div class="alert alert-danger alert-dismissible fade show" role="alert">
-								<div>
+							<div th:if="${validationErrors != null}" class="alert alert-danger alert-dismissible fade show"
+								role="alert">
+								<div th:each="error : ${validationErrors.getAllErrors()}">
 									<i class="bi bi-exclamation-octagon me-1"></i>
-									<span>エラーメッセージを表示します。</span>
+									<span th:text="${error.getDefaultMessage()}">エラーメッセージ</span>
 								</div>
-								<button type="button" class="btn-close" data-bs-dismiss="alert"
-									aria-label="Close"></button>
+								<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+							</div>
+
+							<div th:if="${isSuccess == true}" class="alert alert-success alert-dismissible fade show" role="alert">
+								<div>
+									<i class="bi bi-check-circle me-1"></i>
+									トピックを投稿しました。
+									<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+								</div>
 							</div>
 
 							<!-- Vertical Form -->
-							<form class="row g-3">
+							<form class="row g-3" method="post" th:action="@{/home/topic/regist}" th:object="${requestTopic}">
 								<div class="col-12">
-									<label for="inputNanme4" class="form-label">タイトル</label>
-									<input type="text" class="form-control" id="inputNanme4">
+									<label for="inputTitle" class="form-label">タイトル</label>
+									<input type="text" name="title" class="form-control" id="inputTitle">
 								</div>
 
 								<div class="col-12">
-									<label for="inputNanme4" class="form-label">本文</label>
-									<textarea class="form-control" style="height: 100px"></textarea>
+									<label for="inputBody" class="form-label">本文</label>
+									<textarea class="form-control" name="body" style="height: 100px" id="inputBody"></textarea>
 								</div>
 
 								<div class="col-12">
-									<label for="inputNanme4" class="form-label">写真</label>
-									<input class="form-control" type="file" id="formFile">
+									<label for="formFile" class="form-label">写真</label>
+									<input class="form-control" name="image" type="file" id="formFile">
 								</div>
 
 								<div class="text-center">
