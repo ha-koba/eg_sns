@@ -91,6 +91,8 @@ public class TopicsService {
 		if (CollectionUtil.isNotEmpty(commentsList)) {
 			commentsService.delete(commentsList);
 		}
+		
+		// TODO: トピックにぶら下がってる画像を削除。
 
 		// トピックを削除。
 		repository.delete(topics);

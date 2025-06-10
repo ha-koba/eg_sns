@@ -50,6 +50,7 @@ public class Topics extends EntityBase {
 	@JoinColumn(name = "users_id", referencedColumnName = "id", insertable = false, updatable = false)
 	private Users users;
 
+	/** コメントリストとのJOIN */
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name = "topics_id", referencedColumnName = "id", insertable = false, updatable = false)
 	private List<Comments> commentsList;

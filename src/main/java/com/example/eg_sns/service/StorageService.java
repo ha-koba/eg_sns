@@ -34,6 +34,7 @@ public class StorageService {
 	 * @return ファイルアップロード先の、Webサイトで見たときのドキュメントルートからの相対パスが返却される。
 	 */
 	public String store(MultipartFile multipartFile) {
+		// TODO: トピックイメージの分岐を組み込む
 
 		// ファイル名取得
 		String fileName = multipartFile.getOriginalFilename();
