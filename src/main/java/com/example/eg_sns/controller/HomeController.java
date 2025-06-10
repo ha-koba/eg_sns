@@ -1,5 +1,7 @@
 package com.example.eg_sns.controller;
 
+import java.util.List;
+
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -47,6 +49,16 @@ public class HomeController extends AppController {
 		if (!model.containsAttribute("requestTopic")) {
 			model.addAttribute("requestTopic", new RequestTopic());
 		}
+
+		log.info("トピック詳細画面のアクションが呼ばれました。");
+
+		if (!model.containsAttribute("requestTopicComment")) {
+			model.addAttribute("requestTopicComment", new RequestTopicComment());
+		}
+
+		List<Topics> allTopics = topicsService.findAllTopics();
+		model.addAttribute("allTopics", allTopics);
+		log.info("全てのトピック allTopics={}", allTopics);
 		return "home/index";
 	}
 
@@ -119,6 +131,84 @@ public class HomeController extends AppController {
 		model.addAttribute("topics", topics);
 		model.addAttribute("isSuccess", BooleanUtils.toBoolean(isSuccess));
 
-		return "home/index";
+		return "redirect:/home";
+	}
+
+	/**
+	 * [GET]トピック削除アクション。
+	 *
+	 * @param topicsId トピックID
+	 */
+	@GetMapping("/topic/delete/{topicsId}")
+	public String delete(@PathVariable Long topicsId) {
+
+		log.info("トピック削除処理のアクションが呼ばれました。：topicsId={}", topicsId);
+
+		// ログインユーザー情報取得（※自分が投稿したコメント以外を削除しない為の制御。）
+		Long usersId = getUsersId();
+
+		// コメント削除処理
+		topicsService.delete(topicsId, usersId);
+
+		// ホーム画面へリダイレクト。
+		return "redirect:/home";
+	}
+
+	/**
+	 * [POST]コメント投稿アクション。
+	 *
+	 * @param topicsId トピックID
+	 * @param requestTopicComment 入力フォームの内容
+	 * @param result バリデーション結果
+	 * @param redirectAttributes リダイレクト時に使用するオブジェクト
+	 */
+	@PostMapping("/topic/comment/regist/{topicsId}")
+	public String commentRegist(@PathVariable Long topicsId,
+			@Validated @ModelAttribute RequestTopicComment requestTopicComment,
+			BindingResult result,
+			RedirectAttributes redirectAttributes) {
+
+		log.info("コメント投稿処理のアクションが呼ばれました。：topicsId={}, requestTopicComment={}", topicsId, requestTopicComment);
+
+		// バリデーション。
+		if (result.hasErrors()) {
+			log.warn("バリデーションエラーが発生しました。：topicsId={}, requestTopicComment={}, result={}", topicsId, requestTopicComment,
+					result);
+
+			redirectAttributes.addFlashAttribute("validationErrors", result);
+			redirectAttributes.addFlashAttribute("requestTopicComment", requestTopicComment);
+
+			// 入力画面へリダイレクト。
+			return "redirect:/home/topic/detail/" + StringUtil.toString(topicsId, StringUtil.BLANK);
+		}
+
+		// ログインユーザー情報取得
+		Long usersId = getUsersId();
+
+		// コメント登録処理
+		commentsService.save(requestTopicComment, usersId, topicsId);
+
+		return "redirect:/home/topic/detail/" + StringUtil.toString(topicsId, StringUtil.BLANK);
+	}
+
+	/**
+	 * [GET]コメント削除アクション。
+	 *
+	 * @param topicsId トピックID
+	 * @param commentsId コメントID
+	 */
+	@GetMapping("/topic/comment/delete/{topicsId}/{commentsId}")
+	public String commentDelete(@PathVariable Long topicsId, @PathVariable Long commentsId) {
+
+		log.info("コメント削除処理のアクションが呼ばれました。：topicsId={}, commentsId={}", topicsId, commentsId);
+
+		// ログインユーザー情報取得（※自分が投稿したコメント以外を削除しない為の制御。）
+		Long usersId = getUsersId();
+
+		// コメント削除処理
+		commentsService.delete(commentsId, usersId, topicsId);
+
+		// 入力画面へリダイレクト。
+		return "redirect:/home/topic/detail/" + StringUtil.toString(topicsId, StringUtil.BLANK);
 	}
 }
