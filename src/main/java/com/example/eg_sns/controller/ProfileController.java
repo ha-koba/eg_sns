@@ -55,7 +55,7 @@ public class ProfileController extends AppController {
 	@Autowired
 	private UsersService usersService;
 
-	/** ユーザー関連サービスクラス。 */
+	/** フレンド関連サービスクラス。 */
 	@Autowired
 	private FriendsService friendsService;
 
