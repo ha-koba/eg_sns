@@ -21,50 +21,65 @@
 		<section class="section dashboard">
 			<div class="row">
 
+				<div th:if="${isSuccess == true}" class="alert alert-success alert-dismissible fade show" role="alert">
+					<div>
+						<i class="bi bi-check-circle me-1"></i>
+						トピックを投稿しました。
+						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+					</div>
+				</div>
+
 				<!-- Left side columns -->
 				<div class="col-lg-8">
 					<div class="row" th:each="topics: ${allTopics}">
-
 						<div class="col-lg-12">
-
-							<!--<div th:if="${isSuccess == true}" class="alert alert-success alert-dismissible fade show" role="alert">
-								<div>
-									<i class="bi bi-check-circle me-1"></i>
-									トピックを投稿しました。
-									<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-								</div>
-							</div>-->
-
+							<!-- 1つのカードでまとめる -->
 							<div class="card">
-								<div class="card-body">
-									<h5 class="card-title">[[${topics.title}]]<span> / [[${topics.users.name}]]</span></h5>
-									<span th:utext="${@stringUtil.nl2br(topics.body)}"></span>
-								</div>
-								<div class="card-footer" th:if="${users.id == topics.users.id}">
-									<form action="pages-input.html">
-										<div class="row mb-3">
-											<div class="col-sm-4">
-												<a th:href="@{/topic/delete/{topicsId}(topicsId=${topics.id})}" class="btn btn-danger">削除する</a>
-											</div>
+								<!-- トピックヘッダー -->
+								<div class="card-header">
+									<!-- ヘッダー部：アイコン・名前・ID左寄せ、日付右寄せ -->
+									<div class="d-flex justify-content-between align-items-center mb-2">
+										<div class="d-flex align-items-center">
+											<img
+												th:src="(${topics.users.iconUri} ? ${@storageService.getDataUri(topics.users.iconUri)} : '/assets/img/profile-img.jpg')"
+												alt="Profile" class="rounded-circle me-2"
+												style="width: 40px; height: 40px; object-fit: cover;">
+											<span class="fw-bold me-2" th:text="${topics.users.name}">佐藤太郎</span>
+											<a th:href="@{'/profile/' + ${topics.users.loginId}}" class="text-muted small me-2">
+												@<span th:text="${topics.users.loginId}">sato</span>
+											</a>
 										</div>
-									</form><!-- End General Form Elements -->
+										<span class="text-muted small"
+											th:text="${#dates.format(topics.created, 'yyyy-MM-dd HH:mm:ss')}">2016-05-25</span>
+									</div>
 								</div>
-							</div>
 
-							<div class="card">
+								<!-- トピック本文 -->
 								<div class="card-body">
-									<h5 class="card-title">コメント</h5>
+									<h5 class="card-title" th:text="${topics.title}">タイトル</h5>
+									<div th:each="images : ${topics.topicImagesList}">
+										<img th:src="(${images.imageUri} ? ${@storageService.getDataUri(images.imageUri)} : '')"
+											class="img-fluid mb-2"><br>
+									</div>
+									<div th:utext="${@stringUtil.nl2br(topics.body)}"></div>
+								</div>
 
-									<div th:if="${validationErrors != null}" class="alert alert-danger alert-dismissible fade show"
+								<!-- トピック削除ボタン（投稿者のみ表示） -->
+								<div class="card-footer" th:if="${users.id == topics.users.id}">
+									<a th:href="@{/topic/delete/{topicsId}(topicsId=${topics.id})}" class="btn btn-danger btn-sm">削除する</a>
+								</div>
+
+								<!-- コメント投稿フォーム -->
+								<div class="card-body border-top">
+									<h5 class="card-title">コメント投稿</h5>
+									<div th:if="${commentValidationErrors != null}" class="alert alert-danger alert-dismissible fade show"
 										role="alert">
-										<div th:each="error : ${validationErrors.getAllErrors()}">
+										<div th:each="error : ${commentValidationErrors.getAllErrors()}">
 											<i class="bi bi-exclamation-octagon me-1"></i>
 											<span th:text="${error.getDefaultMessage()}">エラーメッセージ</span>
 										</div>
 										<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 									</div>
-
-									<!-- General Form Elements -->
 									<form method="post" th:action="@{/home/topic/comment/regist/{id}(id=${topics.id})}"
 										th:object="${requestTopicComment}">
 										<div class="row mb-3">
@@ -73,37 +88,51 @@
 												<textarea class="form-control" name="body" style="height: 100px" th:field="*{body}"></textarea>
 											</div>
 										</div>
-
 										<div class="row mb-3">
 											<label class="col-sm-2 col-form-label"></label>
 											<div class="col-sm-10">
 												<button type="submit" class="btn btn-primary">コメントする</button>
 											</div>
 										</div>
-									</form><!-- End General Form Elements -->
-
+									</form>
 								</div>
-							</div>
 
-							<div class="card" th:each="comments:${topics.commentsList}">
-								<div class="card-body">
-									<h5 class="card-title"><span>[[${comments.users.name}]]</span></h5>
-									<span th:utext="${@stringUtil.nl2br(comments.body)}"></span>
-								</div>
-								<div class="card-footer" th:if="${users.id == comments.users.id}">
-									<div class="row mb-3">
-										<div class="col-sm-4">
-											<a th:href="@{/topic/comment/delete/{topicsId}/{commentsId}(topicsId=${topics.id}, commentsId=${comments.id})}"
-												class="btn btn-danger">削除する</a>
+								<!-- コメント一覧 -->
+								<div class="card-body border-top" th:if="${not #lists.isEmpty(topics.commentsList)}">
+									<h5 class="card-title">コメント</h5>
+									<div class="list-group">
+										<div class="list-group-item" th:each="comments: ${topics.commentsList}">
+											<!-- ヘッダー部：アイコン・名前・ID左寄せ、日付右寄せ -->
+											<div class="d-flex justify-content-between align-items-center mb-2">
+												<div class="d-flex align-items-center">
+													<img
+														th:src="(${comments.users.iconUri} ? ${@storageService.getDataUri(comments.users.iconUri)} : '/assets/img/profile-img.jpg')"
+														alt="Profile" class="rounded-circle me-2"
+														style="width: 40px; height: 40px; object-fit: cover;">
+													<span class="fw-bold me-2" th:text="${comments.users.name}">佐藤太郎</span>
+													<a th:href="@{'/profile/' + ${comments.users.loginId}}" class="text-muted small me-2">
+														@<span th:text="${comments.users.loginId}">sato</span>
+													</a>
+												</div>
+												<span class="text-muted small"
+													th:text="${#dates.format(comments.created, 'yyyy-MM-dd HH:mm:ss')}">2016-05-25</span>
+											</div>
+											<!-- コメント本文 -->
+											<div class="mb-2" th:utext="${@stringUtil.nl2br(comments.body)}"></div>
+											<!-- 削除ボタン -->
+											<div th:if="${users.id == comments.users.id}">
+												<a th:href="@{/home/topic/comment/delete/{topicsId}/{commentsId}(topicsId=${topics.id}, commentsId=${comments.id})}"
+													class="btn btn-danger btn-sm">削除する</a>
+											</div>
 										</div>
 									</div>
 								</div>
-							</div>
 
+							</div><!-- End card -->
 						</div>
-
 					</div>
 				</div><!-- End Left side columns -->
+
 
 				<!-- Right side columns -->
 				<div class="col-lg-4">
@@ -112,9 +141,9 @@
 						<div class="card-body">
 							<h5 class="card-title">今の気持ちをシェアしよう！</h5>
 
-							<div th:if="${validationErrors != null}" class="alert alert-danger alert-dismissible fade show"
+							<div th:if="${topicValidationErrors != null}" class="alert alert-danger alert-dismissible fade show"
 								role="alert">
-								<div th:each="error : ${validationErrors.getAllErrors()}">
+								<div th:each="error : ${topicValidationErrors.getAllErrors()}">
 									<i class="bi bi-exclamation-octagon me-1"></i>
 									<span th:text="${error.getDefaultMessage()}">エラーメッセージ</span>
 								</div>
@@ -130,20 +159,36 @@
 							</div>
 
 							<!-- Vertical Form -->
-							<form class="row g-3" method="post" th:action="@{/home/topic/regist}" th:object="${requestTopic}">
+							<form class="row g-3" method="post" enctype="multipart/form-data" th:action="@{/home/topic/regist}"
+								th:object="${requestTopic}">
 								<div class="col-12">
 									<label for="inputTitle" class="form-label">タイトル</label>
-									<input type="text" name="title" class="form-control" id="inputTitle">
+									<input type="text" name="title" class="form-control" id="inputTitle" th:field="*{title}">
 								</div>
 
 								<div class="col-12">
 									<label for="inputBody" class="form-label">本文</label>
-									<textarea class="form-control" name="body" style="height: 100px" id="inputBody"></textarea>
+									<textarea class="form-control" name="body" style="height: 100px" id="inputBody"
+										th:field="*{body}"></textarea>
 								</div>
 
 								<div class="col-12">
-									<label for="formFile" class="form-label">写真</label>
-									<input class="form-control" name="image" type="file" id="formFile">
+									<label for="topicFile" class="form-label">写真</label>
+									<!-- <input class="form-control" name="topicFile" type="file" id="topicFile"> -->
+									<div class="col-md-8 col-lg-8">
+										<span id="previewbox">
+											<img th:if="false" alt="topic画像" id="previewimg" style="height: 120px;">
+										</span>
+										<div class="pt-2">
+											<label>
+												<i class="bi bi-upload btn btn-primary btn-sm"></i>
+												<input type="file" name="topicFile" id="filesend" style="display: none;" accept="image/*">
+											</label>
+											<!-- リセットボタン -->
+											<a href="#" class="btn btn-danger btn-sm" title="Remove my profile image"
+												onclick="resetPreview();"><i class="bi bi-trash"></i></a>
+										</div>
+									</div>
 								</div>
 
 								<div class="text-center">
@@ -162,32 +207,32 @@
 							<div class="news">
 								<div class="post-item clearfix">
 									<img src="/assets/img/news-1.jpg" alt="">
-									<h4><a href="users-profile.jsp">今週ランチです。</a></h4>
+									<h4><a href="#">今週ランチです。</a></h4>
 									<p>ハヤシライス、ピリ辛味噌バターコーンのスープパスタを食べてきました。...</p>
 								</div>
 
 								<div class="post-item clearfix">
 									<img src="/assets/img/news-2.jpg" alt="">
-									<h4><a href="users-profile.jsp">様々なカクテルに秘められたストーリーをチェック</a></h4>
+									<h4><a href="#">様々なカクテルに秘められたストーリーをチェック</a></h4>
 									<p>ハイビスカス香るまろやかなホットカクテルで、冬の寒さをくつろぎながら乗り切りましょう！...</p>
 								</div>
 
 								<div class="post-item clearfix">
 									<img src="/assets/img/news-3.jpg" alt="">
-									<h4><a href="users-profile.jsp">【MEN】HOW TO FIND THE BEST SUIT for FRESHERS
+									<h4><a href="#">【MEN】HOW TO FIND THE BEST SUIT for FRESHERS
 											CAMPAIGN</a></h4>
 									<p>新しい季節を迎え、新しい門出を迎えるお客様へポール・スチュアートの特別なメニューをご用意しました。...</p>
 								</div>
 
 								<div class="post-item clearfix">
 									<img src="/assets/img/news-4.jpg" alt="">
-									<h4><a href="users-profile.jsp">20歳から続けていたトライアスロンを、仕事に集中するため一時的にやめてみたら</a></h4>
+									<h4><a href="#">20歳から続けていたトライアスロンを、仕事に集中するため一時的にやめてみたら</a></h4>
 									<p>トライアスロンの練習は疲労をもたらします。でも習慣にしている練習をやめてしまうと、もっと体が疲労するというのです。...</p>
 								</div>
 
 								<div class="post-item clearfix">
 									<img src="/assets/img/news-5.jpg" alt="">
-									<h4><a href="users-profile.jsp">こんにちは！</a></h4>
+									<h4><a href="#">こんにちは！</a></h4>
 									<p>東京は、日中は日差しが出て少し気温が上がったように感じます...</p>
 								</div>
 

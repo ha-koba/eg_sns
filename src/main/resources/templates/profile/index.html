@@ -44,14 +44,12 @@
 								</div>
 
 								<div class="card-body">
-									<div class="alert alert-danger alert-dismissible fade show" role="alert"
-										th:if="${validationErrors}">
+									<div class="alert alert-danger alert-dismissible fade show" role="alert" th:if="${validationErrors}">
 										<div th:object="${requestAccount}" th:each="errMsg : ${errorMessages}">
 											<i class="bi bi-exclamation-octagon me-1"></i>
 											<span th:text="${errMsg}">エラーメッセージを表示します。</span>
 										</div>
-										<button type="button" class="btn-close" data-bs-dismiss="alert"
-											aria-label="Close"></button>
+										<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 									</div>
 									<form class="row g-3">
 										<div class="col-md-12">
@@ -119,14 +117,12 @@
 								</div>
 
 								<div class="card-body">
-									<div class="alert alert-danger alert-dismissible fade show" role="alert"
-										th:if="${validationErrors}">
+									<div class="alert alert-danger alert-dismissible fade show" role="alert" th:if="${validationErrors}">
 										<div th:object="${requestAccount}" th:each="errMsg : ${errorMessages}">
 											<i class="bi bi-exclamation-octagon me-1"></i>
 											<span th:text="${errMsg}">エラーメッセージを表示します。</span>
 										</div>
-										<button type="button" class="btn-close" data-bs-dismiss="alert"
-											aria-label="Close"></button>
+										<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 									</div>
 
 									<form class="row g-3">
@@ -316,36 +312,37 @@
 											<i class="bi bi-exclamation-octagon me-1"></i>
 											<span th:text="${errMsg}">エラーメッセージを表示します。</span>
 										</div>
-										<button type="button" class="btn-close" data-bs-dismiss="alert"
-											aria-label="Close"></button>
+										<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+									</div>
+
+									<div class="alert alert-danger alert-dismissible fade show" role="alert" th:if="${errMsg}">
+										<div>
+											<i class="bi bi-exclamation-octagon me-1"></i>
+											<span th:text="${errMsg}">エラーメッセージを表示します。</span>
+										</div>
+										<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 									</div>
 
 									<!-- Change Password Form -->
-									<form>
+									<form th:action="@{/profile/password/change}" method="post">
 										<div class="row mb-3">
-											<label for="currentPassword"
-												class="col-md-4 col-lg-4 col-form-label">現在のパスワード</label>
+											<label for="currentPassword" class="col-md-4 col-lg-4 col-form-label">現在のパスワード</label>
 											<div class="col-md-8 col-lg-8">
-												<input name="password" type="password" class="form-control"
-													id="currentPassword">
+												<input name="currentPassword" type="password" class="form-control" id="currentPassword">
 											</div>
 										</div>
 
 										<div class="row mb-3">
-											<label for="newPassword"
-												class="col-md-4 col-lg-4 col-form-label">新しいパスワード</label>
+											<label for="newPassword" class="col-md-4 col-lg-4 col-form-label">新しいパスワード</label>
 											<div class="col-md-8 col-lg-8">
-												<input name="newpassword" type="password" class="form-control"
-													id="newPassword">
+												<input name="newPassword" type="password" class="form-control" id="newPassword">
 											</div>
 										</div>
 
 										<div class="row mb-3">
-											<label for="renewPassword"
-												class="col-md-4 col-lg-4 col-form-label">新しいパスワードを再入力</label>
+											<label for="confirmPassword" class="col-md-4 col-lg-4 col-form-label">新しいパスワードを再入力</label>
 											<div class="col-md-8 col-lg-8">
-												<input name="renewpassword" type="password" class="form-control"
-													id="renewPassword">
+												<input name="confirmPassword" type="password" class="form-control" id="confirmPassword">
 											</div>
 										</div>
 

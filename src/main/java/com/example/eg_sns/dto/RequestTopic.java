@@ -24,4 +24,7 @@ public class RequestTopic extends DtoBase {
 	@NotBlank(message = "本文を入力してください。")
 	@Size(max = 2000, message = "本文は最大2000文字です。")
 	private String body;
+	
+	/** 投稿画像のファイル */
+	private String topicFileHidden;
 }

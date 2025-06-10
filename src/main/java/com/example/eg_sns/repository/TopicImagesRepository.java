@@ -6,5 +6,5 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 import com.example.eg_sns.entity.TopicImages;
 
 public interface TopicImagesRepository extends PagingAndSortingRepository<TopicImages, Long>, CrudRepository<TopicImages, Long> {
-
+	// サービスで利用しているためファイル削除不可
 }

@@ -32,6 +32,7 @@ public class CommentsService {
 	 * @param topicsId トピックID
 	 */
 	public Comments save(RequestTopicComment requestTopicComment, Long usersId, Long topicsId) {
+		log.info("コメントを登録します。：requestTopicComment={}, usersId={}, topicsId={}", requestTopicComment, usersId, topicsId);
 		Comments topics = new Comments();
 		topics.setUsersId(usersId);
 		topics.setTopicsId(topicsId);

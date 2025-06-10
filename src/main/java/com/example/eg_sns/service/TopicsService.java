@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.example.eg_sns.core.AppNotFoundException;
 import com.example.eg_sns.dto.RequestTopic;
 import com.example.eg_sns.entity.Comments;
+import com.example.eg_sns.entity.TopicImages;
 import com.example.eg_sns.entity.Topics;
 import com.example.eg_sns.repository.TopicsRepository;
 import com.example.eg_sns.util.CollectionUtil;
@@ -30,6 +31,10 @@ public class TopicsService {
 	/** コメント関連サービスクラス。 */
 	@Autowired
 	private CommentsService commentsService;
+
+	/** コメント関連サービスクラス。 */
+	@Autowired
+	private TopicImagesService topicImagesService;
 
 	/**
 	 * トピック全件取得する。
@@ -91,8 +96,12 @@ public class TopicsService {
 		if (CollectionUtil.isNotEmpty(commentsList)) {
 			commentsService.delete(commentsList);
 		}
-		
-		// TODO: トピックにぶら下がってる画像を削除。
+
+		// トピックにぶら下がってる画像を削除。
+		List<TopicImages> topicImagesList = topics.getTopicImagesList();
+		if (CollectionUtil.isNotEmpty(topicImagesList)) {
+			topicImagesService.delete(topicImagesList);
+		}
 
 		// トピックを削除。
 		repository.delete(topics);

@@ -2,7 +2,6 @@ package com.example.eg_sns.controller;
 
 import java.util.List;
 
-import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,21 +12,22 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.example.eg_sns.core.AppNotFoundException;
 import com.example.eg_sns.dto.RequestTopic;
 import com.example.eg_sns.dto.RequestTopicComment;
+import com.example.eg_sns.entity.TopicImages;
 import com.example.eg_sns.entity.Topics;
 import com.example.eg_sns.service.CommentsService;
+import com.example.eg_sns.service.StorageService;
+import com.example.eg_sns.service.StorageService.FileType;
+import com.example.eg_sns.service.TopicImagesService;
 import com.example.eg_sns.service.TopicsService;
-import com.example.eg_sns.util.StringUtil;
 
 import lombok.extern.log4j.Log4j2;
 
-/**
- * ※TODO 適宜実装を入れてください。
- */
 @Log4j2
 @Controller
 @RequestMapping("/home")
@@ -40,6 +40,14 @@ public class HomeController extends AppController {
 	/** コメント関連サービスクラス。 */
 	@Autowired
 	private CommentsService commentsService;
+
+	/** トピック関連サービスクラス。 */
+	@Autowired
+	private TopicImagesService topicImagesService;
+
+	/** ファイルアップロード関連サービスクラス。 */
+	@Autowired
+	private StorageService storageService;
 
 	@GetMapping(path = { "", "/" })
 	public String index(Model model) {
@@ -76,6 +84,7 @@ public class HomeController extends AppController {
 	@PostMapping("/topic/regist")
 	public String regist(@Validated @ModelAttribute RequestTopic requestTopic,
 			BindingResult result,
+			@RequestParam(required = false) MultipartFile topicFile,
 			RedirectAttributes redirectAttributes) {
 
 		log.info("トピック作成処理のアクションが呼ばれました。：requestTopic={}", requestTopic);
@@ -84,7 +93,7 @@ public class HomeController extends AppController {
 		if (result.hasErrors()) {
 			log.warn("バリデーションエラーが発生しました。：requestTopic={}, result={}", requestTopic, result);
 
-			redirectAttributes.addFlashAttribute("validationErrors", result);
+			redirectAttributes.addFlashAttribute("topicValidationErrors", result);
 			redirectAttributes.addFlashAttribute("requestTopic", requestTopic);
 
 			// 入力画面へリダイレクト。
@@ -94,43 +103,30 @@ public class HomeController extends AppController {
 		// ログインユーザー情報取得
 		Long usersId = getUsersId();
 
-		// データ登録処理
+		// 画像ファイルの保存処理（画像がある場合のみ）
+		String fileUri = null;
+		if (topicFile != null && !topicFile.isEmpty()) {
+			if (!StorageService.isImageFile(topicFile)) {
+				result.rejectValue("topicFileHidden", "error.invalidFile", "画像ファイルを指定してください。");
+
+				redirectAttributes.addFlashAttribute("topicValidationErrors", result);
+				redirectAttributes.addFlashAttribute("requestTopic", requestTopic);
+				return "redirect:/home";
+			}
+			fileUri = storageService.store(topicFile, FileType.TOPIC_IMG);
+		}
+
+		// トピック本体の保存
 		Topics topics = topicsService.save(requestTopic, usersId);
+		log.info("トピックを登録しました。topics id={}, topics={}", topics.getId(), topics);
+
+		// 画像がある場合のみトピックイメージDBへ保存
+		if (fileUri != null && !fileUri.isEmpty()) {
+			TopicImages topicImages = topicImagesService.save(topics.getId(), fileUri);
+			log.info("トピックイメージを登録しました。topics id={}, topicImages={}", topics.getId(), topicImages);
+		}
 
 		redirectAttributes.addFlashAttribute("isSuccess", "true");
-		log.info("トピックを登録しました。topics id={}, topics={}", topics.getId(), topics);
-		return "redirect:/home/topic/detail/" + StringUtil.toString(topics.getId(), StringUtil.BLANK);
-	}
-
-	/**
-	 * [GET]トピック詳細アクション。
-	 *
-	 * @param topicsId トピックID
-	 * @param isSuccess コメント投稿完了からの正常の遷移であるか、否か。（true.正常）
-	 * @param model 画面にデータを送るためのオブジェクト
-	 */
-	@GetMapping("/topic/detail/{topicsId}")
-	public String detail(@PathVariable Long topicsId,
-			@ModelAttribute("isSuccess") String isSuccess,
-			Model model) {
-
-		log.info("トピック詳細画面のアクションが呼ばれました。");
-
-		if (!model.containsAttribute("requestTopicComment")) {
-			model.addAttribute("requestTopicComment", new RequestTopicComment());
-		}
-
-		// トピック情報を取得する。
-		Topics topics = topicsService.findTopics(topicsId);
-
-		if (topics == null) {
-			// トピックが取得できない場合は、Not Found。
-			throw new AppNotFoundException();
-		}
-
-		model.addAttribute("topics", topics);
-		model.addAttribute("isSuccess", BooleanUtils.toBoolean(isSuccess));
-
 		return "redirect:/home";
 	}
 
@@ -175,11 +171,11 @@ public class HomeController extends AppController {
 			log.warn("バリデーションエラーが発生しました。：topicsId={}, requestTopicComment={}, result={}", topicsId, requestTopicComment,
 					result);
 
-			redirectAttributes.addFlashAttribute("validationErrors", result);
+			redirectAttributes.addFlashAttribute("commentValidationErrors", result);
 			redirectAttributes.addFlashAttribute("requestTopicComment", requestTopicComment);
 
 			// 入力画面へリダイレクト。
-			return "redirect:/home/topic/detail/" + StringUtil.toString(topicsId, StringUtil.BLANK);
+			return "redirect:/home";
 		}
 
 		// ログインユーザー情報取得
@@ -188,7 +184,7 @@ public class HomeController extends AppController {
 		// コメント登録処理
 		commentsService.save(requestTopicComment, usersId, topicsId);
 
-		return "redirect:/home/topic/detail/" + StringUtil.toString(topicsId, StringUtil.BLANK);
+		return "redirect:/home";
 	}
 
 	/**
@@ -209,6 +205,6 @@ public class HomeController extends AppController {
 		commentsService.delete(commentsId, usersId, topicsId);
 
 		// 入力画面へリダイレクト。
-		return "redirect:/home/topic/detail/" + StringUtil.toString(topicsId, StringUtil.BLANK);
+		return "redirect:/home";
 	}
 }

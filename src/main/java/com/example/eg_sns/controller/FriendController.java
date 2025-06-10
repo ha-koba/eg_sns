@@ -47,7 +47,6 @@ public class FriendController extends AppController {
 		Long loginUsersId = loginUsers.getId();
 
 		model.addAttribute("loginUsers", loginUsers);
-		model.addAttribute("usersList", usersList); // TODO: 後で削除
 
 		// フレンドユーザーとその承認ステータスをセットで保存するリスト
 		List<UsersAndApprovalStatus> usersAndStatusList = friendsService.getUsersAndApprovalStatus(usersList, loginUsersId);
@@ -73,7 +72,6 @@ public class FriendController extends AppController {
 
 		// バリデーション。
 		if (result.hasErrors()) {
-			// TODO: 一旦ログの表示のみ
 			// ボタンを押した時にそのユーザーが削除されているケースなどが考えられる
 			log.warn("バリデーションエラーが発生しました。 requestFriend={}, result={}", requestFriend, result);
 			return "redirect:/friend/list";
