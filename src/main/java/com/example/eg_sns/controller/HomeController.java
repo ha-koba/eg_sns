@@ -1,6 +1,7 @@
 package com.example.eg_sns.controller;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,13 +14,19 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.eg_sns.core.AppNotFoundException;
 import com.example.eg_sns.dto.RequestTopic;
 import com.example.eg_sns.dto.RequestTopicComment;
+import com.example.eg_sns.entity.TopicImages;
 import com.example.eg_sns.entity.Topics;
 import com.example.eg_sns.service.CommentsService;
+import com.example.eg_sns.service.StorageService;
+import com.example.eg_sns.service.StorageService.FileType;
+import com.example.eg_sns.service.TopicImagesService;
 import com.example.eg_sns.service.TopicsService;
 import com.example.eg_sns.util.StringUtil;
 
@@ -40,6 +47,14 @@ public class HomeController extends AppController {
 	/** コメント関連サービスクラス。 */
 	@Autowired
 	private CommentsService commentsService;
+
+	/** トピック関連サービスクラス。 */
+	@Autowired
+	private TopicImagesService topicImagesService;
+
+	/** ファイルアップロード関連サービスクラス。 */
+	@Autowired
+	private StorageService storageService;
 
 	@GetMapping(path = { "", "/" })
 	public String index(Model model) {
@@ -76,6 +91,7 @@ public class HomeController extends AppController {
 	@PostMapping("/topic/regist")
 	public String regist(@Validated @ModelAttribute RequestTopic requestTopic,
 			BindingResult result,
+			@RequestParam MultipartFile topicFile,
 			RedirectAttributes redirectAttributes) {
 
 		log.info("トピック作成処理のアクションが呼ばれました。：requestTopic={}", requestTopic);
@@ -91,14 +107,38 @@ public class HomeController extends AppController {
 			return "redirect:/home";
 		}
 
+		// ファイルチェックを行う。
+		if (!StorageService.isImageFile(topicFile)) {
+			log.warn("指定されたファイルは、画像ファイルではありません。：requestTopic={}", requestTopic);
+
+			// エラーメッセージをセット。
+			result.rejectValue("topicFileHidden", StringUtil.BLANK, "画像ファイルを指定してください。");
+
+			// TODO: エラーメッセージをコメント用と投稿用で分ける。
+			redirectAttributes.addFlashAttribute("validationErrors", result);
+			redirectAttributes.addFlashAttribute("requestTopic", requestTopic);
+
+			// 入力画面へリダイレクト。
+			return "redirect:/home";
+		}
+
+		String fileName = UUID.randomUUID() + "_" + topicFile.getOriginalFilename();
+
 		// ログインユーザー情報取得
 		Long usersId = getUsersId();
 
-		// データ登録処理
+		// ファイルアップロード処理。
+		String fileUri = storageService.store(topicFile, FileType.TOPIC_IMG);
+
+		// トピック登録処理
 		Topics topics = topicsService.save(requestTopic, usersId);
+
+		// トピックイメージ登録処理
+		TopicImages topicImages = topicImagesService.save(topics.getId(), fileUri);
 
 		redirectAttributes.addFlashAttribute("isSuccess", "true");
 		log.info("トピックを登録しました。topics id={}, topics={}", topics.getId(), topics);
+		log.info("トピックイメージを登録しました。topics id={}, topicImages={}", topics.getId(), topicImages);
 		return "redirect:/home/topic/detail/" + StringUtil.toString(topics.getId(), StringUtil.BLANK);
 	}
 

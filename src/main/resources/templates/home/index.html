@@ -21,24 +21,38 @@
 		<section class="section dashboard">
 			<div class="row">
 
+				<div th:if="${isSuccess == true}" class="alert alert-success alert-dismissible fade show" role="alert">
+					<div>
+						<i class="bi bi-check-circle me-1"></i>
+						トピックを投稿しました。
+						<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+					</div>
+				</div>
+
 				<!-- Left side columns -->
 				<div class="col-lg-8">
 					<div class="row" th:each="topics: ${allTopics}">
 
 						<div class="col-lg-12">
 
-							<!--<div th:if="${isSuccess == true}" class="alert alert-success alert-dismissible fade show" role="alert">
-								<div>
-									<i class="bi bi-check-circle me-1"></i>
-									トピックを投稿しました。
-									<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-								</div>
-							</div>-->
-
 							<div class="card">
-								<div class="card-body">
-									<h5 class="card-title">[[${topics.title}]]<span> / [[${topics.users.name}]]</span></h5>
-									<span th:utext="${@stringUtil.nl2br(topics.body)}"></span>
+								<div class="card-header">
+									<img th:src="${topics.users.iconUri}" src="/assets/img/profile-img.jpg" alt="Profile"
+										class="rounded-circle" style="width: 120px;">
+									<span th:text="${topics.users.name}">佐藤太郎</span>
+									<a th:href="@{'/profile/' + ${topics.users.loginId}}">@<span
+											th:text="${topics.users.loginId}">sato</span></a>
+									<span th:text="${#dates.format(topics.created, 'yyyy-MM-dd HH:mm:ss')}">2016-05-25</span>
+								</div>
+
+								<div class="card-body" th:each="images : ${topics.topicImages}">
+
+									<div>
+										<h5 class="card-title"><span>[[${topics.title}]]</span></h5>
+										<img th:src="${images.imageUri}"><br>
+										<span th:utext="${@stringUtil.nl2br(topics.body)}"></span>
+									</div>
+
 								</div>
 								<div class="card-footer" th:if="${users.id == topics.users.id}">
 									<form action="pages-input.html">
@@ -130,7 +144,8 @@
 							</div>
 
 							<!-- Vertical Form -->
-							<form class="row g-3" method="post" th:action="@{/home/topic/regist}" th:object="${requestTopic}">
+							<form class="row g-3" method="post" enctype="multipart/form-data" th:action="@{/home/topic/regist}"
+								th:object="${requestTopic}">
 								<div class="col-12">
 									<label for="inputTitle" class="form-label">タイトル</label>
 									<input type="text" name="title" class="form-control" id="inputTitle">
@@ -142,8 +157,33 @@
 								</div>
 
 								<div class="col-12">
-									<label for="formFile" class="form-label">写真</label>
-									<input class="form-control" name="image" type="file" id="formFile">
+									<label for="topicFile" class="form-label">写真</label>
+									<!-- <input class="form-control" name="topicFile" type="file" id="topicFile"> -->
+									<div class="col-md-8 col-lg-8">
+										<!-- <span id="previewbox">
+											<img
+												th:if="${requestTopic != null and requestTopic.imageUri != null}"
+												th:src="@{${requestTopic.imageUri}}"
+												src="/assets/img/profile-img.jpg"
+												alt="topic画像"
+												id="previewimg"
+												style="height: 120px;">
+										</span> -->
+										<span id="previewbox">
+											<img th:if="false" alt="topic画像" id="previewimg" style="height: 120px;">
+										</span>
+										<div class="pt-2">
+											<label>
+												<i class="bi bi-upload btn btn-primary btn-sm"></i>
+												<input type="file" name="topicFile" id="filesend" style="display: none;" accept="image/*">
+											</label>
+											<!-- サーバーにアップロード済みの場合は、ここにimageUriを格納（編集時用） -->
+											<!--<input type="hidden" name="topicFileHidden" id="filesendHidden" th:value="*{imageUri}">-->
+											<!-- リセットボタン（画像が選択されている場合のみ表示） -->
+											<a href="#" class="btn btn-danger btn-sm" title="Remove my profile image"
+												onclick="resetPreview();"><i class="bi bi-trash"></i></a>
+										</div>
+									</div>
 								</div>
 
 								<div class="text-center">

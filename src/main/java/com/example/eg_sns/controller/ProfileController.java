@@ -25,6 +25,7 @@ import com.example.eg_sns.entity.Friends;
 import com.example.eg_sns.entity.Users;
 import com.example.eg_sns.service.FriendsService;
 import com.example.eg_sns.service.StorageService;
+import com.example.eg_sns.service.StorageService.FileType;
 import com.example.eg_sns.service.UsersService;
 import com.example.eg_sns.util.StringUtil;
 
@@ -227,7 +228,7 @@ public class ProfileController extends AppController {
 		// ユーザー検索を行う。
 		Users users = getUsers();
 		// ファイルアップロード処理。
-		String fileUri = storageService.store(profileFile);
+		String fileUri = storageService.store(profileFile, FileType.PROFILE_IMG);
 
 		// fileUriが取得できない且つ、hiddenの値にファイルが設定されている場合は「設定済みのファイルが変更されていない状態」である為、hiddenの値で更新する。
 		if (StringUtils.isEmpty(fileUri) && !StringUtils.isEmpty(requestModifyAccount.getProfileFileHidden())) {

@@ -39,3 +39,7 @@ out/
 ### プロファイル画像 ###
 src/main/resources/static/assets/profileimg/*
 !src/main/resources/static/assets/profileimg/empty
+
+### トピック画像 ###
+src/main/resources/static/assets/topicimg/*
+!src/main/resources/static/assets/topicimg/empty

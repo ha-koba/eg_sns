@@ -27,7 +27,7 @@ public class TopicImagesService {
 	 * @param imageUri イメージURI
 	 * @param topicsId トピックID
 	 */
-	public TopicImages save(String imageUri, Long topicsId) {
+	public TopicImages save(Long topicsId, String imageUri) {
 		TopicImages topicImages = new TopicImages();
 		topicImages.setTopicsId(topicsId);
 		topicImages.setImageUri(imageUri);

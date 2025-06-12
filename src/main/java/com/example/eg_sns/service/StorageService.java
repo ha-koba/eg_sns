@@ -4,14 +4,15 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Base64;
+import java.util.UUID;
 
 import javax.imageio.ImageIO;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.thymeleaf.util.StringUtils;
@@ -27,55 +28,51 @@ import lombok.extern.log4j.Log4j2;
 @Service
 public class StorageService {
 
+	public enum FileType {
+		PROFILE_IMG("profileimg", "/assets/profileimg/"), TOPIC_IMG("topicimg", "/assets/topicimg/");
+
+		private final String dirName;
+		private final String webPath;
+
+		FileType(String dirName, String webPath) {
+			this.dirName = dirName;
+			this.webPath = webPath;
+		}
+	}
+
+	@Value("${upload.base.dir}")
+	private String baseDir;
+
 	/**
-	 * ファイルアップロード処理。
-	 *
-	 * @param multipartFile マルチパートで受信したファイル。
-	 * @return ファイルアップロード先の、Webサイトで見たときのドキュメントルートからの相対パスが返却される。
+	 * ファイルアップロード処理
+	 * 
+	 * @param topicFile アップロードファイル
+	 * @param fileType ファイル種別（プロフィール画像/トピック画像）
+	 * @return Webアクセス用パス（例：/assets/topicimg/xxx.jpg）
 	 */
-	public String store(MultipartFile multipartFile) {
-		// TODO: トピックイメージの分岐を組み込む
-
-		// ファイル名取得
-		String fileName = multipartFile.getOriginalFilename();
-
-		if (StringUtils.isEmpty(fileName)) {
+	public String store(MultipartFile topicFile, FileType fileType) {
+		if (topicFile.isEmpty()) {
 			return null;
 		}
 
-		// 格納先の相対パス
-		Path filePath = Paths.get("src/main/resources/static/assets/profileimg/" + fileName);
+		// ファイル名生成（UUID + 元ファイル名）
+		String fileName = UUID.randomUUID() + "_" + topicFile.getOriginalFilename();
 
-		OutputStream stream = null;
 		try {
+			// 保存先ディレクトリのパス作成
+			Path storageDir = Paths.get(baseDir, fileType.dirName);
+			Files.createDirectories(storageDir);
 
-			File file = new File(filePath.toString());
-			if (file.exists()) {
-				return "/assets/profileimg/" + fileName;
-			}
+			// ファイル保存
+			Path targetPath = storageDir.resolve(fileName);
+			Files.copy(topicFile.getInputStream(), targetPath);
 
-			// バイト値を書き込む為のファイルを作成して指定したパスに格納
-			stream = Files.newOutputStream(filePath);
+			return fileType.webPath + fileName;
 
-			// アップロードファイルをバイト値に変換
-			byte[] bytes = multipartFile.getBytes();
-
-			// ファイルに書き込み
-			stream.write(bytes);
 		} catch (IOException e) {
-			log.error("ファイルアップロード中にエラーが発生しました。", e);
+			log.error("ファイルアップロードエラー: {}", e.getMessage());
 			return null;
-		} finally {
-			if (stream != null) {
-				try {
-					stream.close();
-
-				} catch (IOException e) {
-					log.error("ファイルアップロードのクローズ処理でエラーが発生しました。", e);
-				}
-			}
 		}
-		return "/assets/profileimg/" + fileName;
 	}
 
 	/**
