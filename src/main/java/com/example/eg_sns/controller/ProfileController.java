@@ -3,7 +3,6 @@ package com.example.eg_sns.controller;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -21,6 +20,7 @@ import org.thymeleaf.util.StringUtils;
 import com.example.eg_sns.core.annotation.LoginCheck;
 import com.example.eg_sns.dto.RequestFriend;
 import com.example.eg_sns.dto.RequestModifyAccount;
+import com.example.eg_sns.dto.RequestPasswordChangeForm;
 import com.example.eg_sns.entity.Friends;
 import com.example.eg_sns.entity.Users;
 import com.example.eg_sns.service.FriendsService;
@@ -29,6 +29,7 @@ import com.example.eg_sns.service.StorageService.FileType;
 import com.example.eg_sns.service.UsersService;
 import com.example.eg_sns.util.StringUtil;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -40,6 +41,7 @@ import lombok.extern.log4j.Log4j2;
 @Log4j2
 @Controller
 @RequestMapping("/profile")
+@RequiredArgsConstructor
 public class ProfileController extends AppController {
 
 	private static final String TARGET_LOGIN_ID = "targetLoginId";
@@ -49,16 +51,13 @@ public class ProfileController extends AppController {
 	private static final String ACTION2 = "action";
 
 	/** ファイルアップロード関連サービスクラス。 */
-	@Autowired
-	private StorageService storageService;
+	private final StorageService storageService;
 
 	/** ユーザー関連サービスクラス。 */
-	@Autowired
-	private UsersService usersService;
+	private final UsersService usersService;
 
 	/** フレンド関連サービスクラス。 */
-	@Autowired
-	private FriendsService friendsService;
+	private final FriendsService friendsService;
 
 	public enum approvalStatus {
 		APPLYING, // 申請済み
@@ -79,6 +78,7 @@ public class ProfileController extends AppController {
 		log.info("プロフィール画面のアクションが呼ばれました。");
 		model.addAttribute("isMyProfile", true);
 		model.addAttribute("requestModifyAccount", getUsers());
+		model.addAttribute("requestPasswordChangeForm", new RequestPasswordChangeForm());
 
 		return "profile/index";
 	}
@@ -100,9 +100,9 @@ public class ProfileController extends AppController {
 		}
 		log.info("targetUser：{}", targetUser);
 
-        Long loginUsersId = getUsersId();			// ログイン中のユーザーのID
-        Long targetUsersId = targetUser.getId();	// 検索対象のユーザーのID
-        log.info("loginUsersId: " + loginUsersId + ", targetUsersId: " + targetUsersId);
+		Long loginUsersId = getUsersId(); // ログイン中のユーザーのID
+		Long targetUsersId = targetUser.getId(); // 検索対象のユーザーのID
+		log.info("loginUsersId: " + loginUsersId + ", targetUsersId: " + targetUsersId);
 
 		// 自身のプロフィールページか
 		boolean isMyProfile = false;
@@ -245,6 +245,67 @@ public class ProfileController extends AppController {
 		users.setAbout(requestModifyAccount.getAbout());
 		users.setIconUri(fileUri);
 		usersService.save(users);
+		return "redirect:/profile";
+	}
+
+	/**
+	 * パスワード変更処理
+	 * @param form パスワード変更フォームの入力値
+	 * @param redirectAttributes リダイレクト先にメッセージを渡すための属性
+	 * @return リダイレクト先
+	 */
+	@PostMapping("/password/change")
+	public String changePassword(@Validated @ModelAttribute RequestPasswordChangeForm requestPasswordChangeForm,
+			BindingResult result, // BindingResultがバリデーション対象の直後にないとバリデーション結果として認識されない。
+			@ModelAttribute RequestPasswordChangeForm form,
+			RedirectAttributes redirectAttributes) {
+
+		log.info("パスワード変更処理を開始します。form={}", form);
+
+		// バリデーション。
+		if (result.hasErrors()) {
+			// javascriptのバリデーションを改ざんしてリクエストした場合に通る処理。
+			log.warn("バリデーションエラーが発生しました。：requestPasswordChangeForm={}, result={}", requestPasswordChangeForm, result);
+
+			redirectAttributes.addFlashAttribute("validationErrors", result);
+
+			// エラーメッセージのリストを渡す
+			List<String> messages = result.getAllErrors()
+					.stream()
+					.map(error -> error.getDefaultMessage())
+					.collect(Collectors.toList());
+			redirectAttributes.addFlashAttribute("errorMessages", messages);
+
+			// 入力画面へリダイレクト。
+			// TODO: プロフィール/プロフィール編集画面にリダイレクト。
+			return "redirect:/profile";
+		}
+
+		// 1. 新しいパスワードと確認用パスワードの一致チェック
+		if (!form.getNewPassword().equals(form.getConfirmPassword())) {
+			log.info("新しいパスワードが一致しません。form.getNewPassword()={}, form.getConfirmPassword()", form.getNewPassword(),
+					form.getConfirmPassword());
+			redirectAttributes.addFlashAttribute("errMsg", "新しいパスワードが一致しません");
+			return "redirect:/profile";
+		}
+
+		// 2. 現在ログイン中のユーザー名を取得
+		Users user = getUsers();
+		String loginId = user.getLoginId();
+		log.info("ログイン中のログインIDを取得します。user={}, loginId={}", user, loginId);
+
+		// 3. 現在のパスワードが正しいかチェック
+		if (!usersService.checkPassword(loginId, form.getCurrentPassword())) {
+			redirectAttributes.addFlashAttribute("errMsg", "現在のパスワードが違います");
+			return "redirect:/profile";
+		}
+
+		// 4. 新しいパスワードを更新
+		usersService.updatePassword(loginId, form.getNewPassword());
+
+		// 5. 成功メッセージを表示
+		redirectAttributes.addFlashAttribute("infoMsg", "パスワードを変更しました");
+		redirectAttributes.addFlashAttribute("isSuccess", true);
 		return "redirect:/profile";
 	}
 }

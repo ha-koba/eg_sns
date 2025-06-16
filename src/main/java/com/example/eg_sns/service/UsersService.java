@@ -2,13 +2,15 @@ package com.example.eg_sns.service;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import jakarta.transaction.Transactional;
+
 import org.springframework.stereotype.Service;
 
 import com.example.eg_sns.dto.RequestAccount;
 import com.example.eg_sns.entity.Users;
 import com.example.eg_sns.repository.UsersRepository;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 
 /**
@@ -18,11 +20,14 @@ import lombok.extern.log4j.Log4j2;
  */
 @Log4j2
 @Service
+@RequiredArgsConstructor // final修飾子が付いたフィールドを引数にとるコンストラクタを自動生成
 public class UsersService {
 
 	/** リポジトリインターフェース。 */
-	@Autowired
-	private UsersRepository repository;
+	private final UsersRepository repository; // Springにより自動でインスタンスが注入される
+
+	/** パスワードのハッシュ化や照合を行うエンコーダ。 */
+//	private final PasswordEncoder passwordEncoder; // Springにより自動でインスタンスが注入される
 
 	/**
 	 * ユーザー検索を行う。
@@ -95,4 +100,39 @@ public class UsersService {
 	public void save(Users users) {
 		repository.save(users);
 	}
+
+	/**
+	 * 指定されたユーザーのパスワードを新しいパスワードに変更します。
+	 * 
+	 * このメソッドはトランザクション管理下で動作し、パスワードの更新処理が失敗した場合も安全にロールバックされます。
+	 * パスワードはハッシュ化して保存されないため注意。
+	 *
+	 * @param loginId パスワードを変更するユーザーのログインID
+	 * @param newPassword 新しいパスワード（ハッシュ化前の生パスワード）
+	 * @throws RuntimeException 指定されたログインIDのユーザーが見つからない場合
+	 */
+	@Transactional
+	public void updatePassword(String loginId, String newPassword) {
+		// ユーザーをログインIDで検索
+		Users users = findUsers(loginId);
+		// 新しいパスワードを設定
+		users.setPassword(newPassword);
+		// 変更内容をデータベースに保存
+		repository.save(users);
+	}
+
+	/**
+	 * ユーザー名とパスワードが一致するかどうかを検証します。
+	 * @param loginId ユーザー名
+	 * @param rawPassword 検証対象の生パスワード
+	 * @return パスワードが一致すればtrue、不一致またはユーザーが存在しなければfalse
+	 */
+	public boolean checkPassword(String loginId, String rawPassword) {
+		Users users = findUsers(loginId);
+		if (users == null) {
+			return false; // ユーザーが存在しない場合
+		}
+		return rawPassword.equals(users.getPassword());
+	}
 }
+
