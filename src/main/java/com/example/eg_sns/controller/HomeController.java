@@ -32,9 +32,6 @@ import com.example.eg_sns.util.StringUtil;
 
 import lombok.extern.log4j.Log4j2;
 
-/**
- * ※TODO 適宜実装を入れてください。
- */
 @Log4j2
 @Controller
 @RequestMapping("/home")

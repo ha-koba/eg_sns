@@ -122,7 +122,7 @@ public class ProfileController extends AppController {
 		log.info("承認ステータスを格納します。approvalStatus：{}", as);
 		model.addAttribute("approvalStatus", as); // 承認ステータス
 		model.addAttribute("isMyProfile", isMyProfile); // 自身のプロフィールではない画面
-		model.addAttribute("requestModifyAccount", targetUser); // TODO: プロフィールは編集できないようにしたいため初期化
+		model.addAttribute("requestModifyAccount", targetUser);
 		model.addAttribute("loginUsers", getUsers());
 
 		return "profile/index";
@@ -146,7 +146,6 @@ public class ProfileController extends AppController {
 
 		// バリデーション。
 		if (result.hasErrors()) {
-			// TODO: 一旦ログの表示のみ
 			// ボタンを押した時にそのユーザーが削除されているケースなどが考えられる
 			log.warn("バリデーションエラーが発生しました。 requestFriend={}, result={}", requestFriend, result);
 			return "redirect:/friend/list";
@@ -200,7 +199,6 @@ public class ProfileController extends AppController {
 			redirectAttributes.addFlashAttribute("errorMessages", messages);
 
 			// 入力画面へリダイレクト。
-			// TODO: プロフィール/プロフィール編集画面にリダイレクト。
 			return "redirect:/profile";
 		}
 
@@ -221,7 +219,6 @@ public class ProfileController extends AppController {
 			redirectAttributes.addFlashAttribute("errorMessages", messages);
 
 			// 入力画面へリダイレクト。
-			// TODO: プロフィール/プロフィール編集画面にリダイレクト。
 			return "redirect:/profile";
 		}
 
@@ -277,7 +274,6 @@ public class ProfileController extends AppController {
 			redirectAttributes.addFlashAttribute("errorMessages", messages);
 
 			// 入力画面へリダイレクト。
-			// TODO: プロフィール/プロフィール編集画面にリダイレクト。
 			return "redirect:/profile";
 		}
 
