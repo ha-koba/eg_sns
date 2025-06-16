@@ -97,7 +97,7 @@ public class HomeController extends AppController {
 		if (result.hasErrors()) {
 			log.warn("バリデーションエラーが発生しました。：requestTopic={}, result={}", requestTopic, result);
 
-			redirectAttributes.addFlashAttribute("validationErrors", result);
+			redirectAttributes.addFlashAttribute("topicValidationErrors", result);
 			redirectAttributes.addFlashAttribute("requestTopic", requestTopic);
 
 			// 入力画面へリダイレクト。
@@ -111,7 +111,6 @@ public class HomeController extends AppController {
 			// エラーメッセージをセット。
 			result.rejectValue("topicFileHidden", StringUtil.BLANK, "画像ファイルを指定してください。");
 
-			// TODO: エラーメッセージをコメント用と投稿用で分ける。
 			redirectAttributes.addFlashAttribute("validationErrors", result);
 			redirectAttributes.addFlashAttribute("requestTopic", requestTopic);
 
@@ -149,7 +148,9 @@ public class HomeController extends AppController {
 	@GetMapping("/topic/detail/{topicsId}")
 	public String detail(@PathVariable Long topicsId,
 			@ModelAttribute("isSuccess") String isSuccess,
-			Model model) {
+			@ModelAttribute("commentValidationErrors") BindingResult commentValidationErrors,
+			Model model,
+			RedirectAttributes redirectAttributes) {
 
 		log.info("トピック詳細画面のアクションが呼ばれました。");
 
@@ -167,6 +168,7 @@ public class HomeController extends AppController {
 
 		model.addAttribute("topics", topics);
 		model.addAttribute("isSuccess", BooleanUtils.toBoolean(isSuccess));
+		redirectAttributes.addFlashAttribute("commentValidationErrors", commentValidationErrors);
 
 		return "redirect:/home";
 	}
@@ -212,7 +214,7 @@ public class HomeController extends AppController {
 			log.warn("バリデーションエラーが発生しました。：topicsId={}, requestTopicComment={}, result={}", topicsId, requestTopicComment,
 					result);
 
-			redirectAttributes.addFlashAttribute("validationErrors", result);
+			redirectAttributes.addFlashAttribute("commentValidationErrors", result);
 			redirectAttributes.addFlashAttribute("requestTopicComment", requestTopicComment);
 
 			// 入力画面へリダイレクト。

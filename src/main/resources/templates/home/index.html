@@ -63,9 +63,9 @@
 								<!-- コメント投稿フォーム -->
 								<div class="card-body border-top">
 									<h5 class="card-title">コメント投稿</h5>
-									<div th:if="${validationErrors != null}" class="alert alert-danger alert-dismissible fade show"
+									<div th:if="${commentValidationErrors != null}" class="alert alert-danger alert-dismissible fade show"
 										role="alert">
-										<div th:each="error : ${validationErrors.getAllErrors()}">
+										<div th:each="error : ${commentValidationErrors.getAllErrors()}">
 											<i class="bi bi-exclamation-octagon me-1"></i>
 											<span th:text="${error.getDefaultMessage()}">エラーメッセージ</span>
 										</div>
@@ -119,9 +119,9 @@
 						<div class="card-body">
 							<h5 class="card-title">今の気持ちをシェアしよう！</h5>
 
-							<div th:if="${validationErrors != null}" class="alert alert-danger alert-dismissible fade show"
+							<div th:if="${topicValidationErrors != null}" class="alert alert-danger alert-dismissible fade show"
 								role="alert">
-								<div th:each="error : ${validationErrors.getAllErrors()}">
+								<div th:each="error : ${topicValidationErrors.getAllErrors()}">
 									<i class="bi bi-exclamation-octagon me-1"></i>
 									<span th:text="${error.getDefaultMessage()}">エラーメッセージ</span>
 								</div>
