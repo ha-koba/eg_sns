@@ -58,5 +58,5 @@ public class Topics extends EntityBase {
 	/** 画像リストとのJOIN */
 	@OneToMany(fetch = FetchType.LAZY)
 	@JoinColumn(name = "topics_id", referencedColumnName = "id", insertable = false, updatable = false)
-	private List<TopicImages> topicImages;
+	private List<TopicImages> topicImagesList;
 }

@@ -1,5 +1,7 @@
 package com.example.eg_sns.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,5 +34,14 @@ public class TopicImagesService {
 		topicImages.setTopicsId(topicsId);
 		topicImages.setImageUri(imageUri);
 		return repository.save(topicImages);
+	}
+
+	/**
+	 * トピックイメージの削除処理を行う。
+	 *
+	 * @param topicImagesList トピックイメージのリスト
+	 */
+	public void delete(List<TopicImages> topicImagesList) {
+		repository.deleteAll(topicImagesList);
 	}
 }

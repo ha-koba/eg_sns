@@ -45,7 +45,7 @@
 									<span th:text="${#dates.format(topics.created, 'yyyy-MM-dd HH:mm:ss')}">2016-05-25</span>
 								</div>
 
-								<div class="card-body" th:each="images : ${topics.topicImages}">
+								<div class="card-body" th:each="images : ${topics.topicImagesList}">
 
 									<div>
 										<h5 class="card-title"><span>[[${topics.title}]]</span></h5>
