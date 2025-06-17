@@ -37,14 +37,21 @@
 							<div class="card">
 								<!-- トピックヘッダー -->
 								<div class="card-header">
-									<img
-										th:src="(${topics.users.iconUri} ? ${@storageService.getDataUri(topics.users.iconUri)} : '/assets/img/profile-img.jpg')"
-										alt="Profile" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
-									<span th:text="${topics.users.name}">佐藤太郎</span>
-									<a th:href="@{'/profile/' + ${topics.users.loginId}}">@<span
-											th:text="${topics.users.loginId}">sato</span></a>
-									<span class="text-muted"
-										th:text="${#dates.format(topics.created, 'yyyy-MM-dd HH:mm:ss')}">2016-05-25</span>
+									<!-- ヘッダー部：アイコン・名前・ID左寄せ、日付右寄せ -->
+									<div class="d-flex justify-content-between align-items-center mb-2">
+										<div class="d-flex align-items-center">
+											<img
+												th:src="(${topics.users.iconUri} ? ${@storageService.getDataUri(topics.users.iconUri)} : '/assets/img/profile-img.jpg')"
+												alt="Profile" class="rounded-circle me-2"
+												style="width: 40px; height: 40px; object-fit: cover;">
+											<span class="fw-bold me-2" th:text="${topics.users.name}">佐藤太郎</span>
+											<a th:href="@{'/profile/' + ${topics.users.loginId}}" class="text-muted small me-2">
+												@<span th:text="${topics.users.loginId}">sato</span>
+											</a>
+										</div>
+										<span class="text-muted small"
+											th:text="${#dates.format(topics.created, 'yyyy-MM-dd HH:mm:ss')}">2016-05-25</span>
+									</div>
 								</div>
 
 								<!-- トピック本文 -->
@@ -95,12 +102,24 @@
 									<h5 class="card-title">コメント</h5>
 									<div class="list-group">
 										<div class="list-group-item" th:each="comments: ${topics.commentsList}">
-											<div class="d-flex w-100 justify-content-between">
-												<h6 class="mb-1" th:text="${comments.users.name}">ユーザー名</h6>
-												<small class="text-muted"
-													th:text="${#dates.format(comments.created, 'yyyy-MM-dd HH:mm:ss')}">コメント日時</small>
+											<!-- ヘッダー部：アイコン・名前・ID左寄せ、日付右寄せ -->
+											<div class="d-flex justify-content-between align-items-center mb-2">
+												<div class="d-flex align-items-center">
+													<img
+														th:src="(${comments.users.iconUri} ? ${@storageService.getDataUri(comments.users.iconUri)} : '/assets/img/profile-img.jpg')"
+														alt="Profile" class="rounded-circle me-2"
+														style="width: 40px; height: 40px; object-fit: cover;">
+													<span class="fw-bold me-2" th:text="${comments.users.name}">佐藤太郎</span>
+													<a th:href="@{'/profile/' + ${comments.users.loginId}}" class="text-muted small me-2">
+														@<span th:text="${comments.users.loginId}">sato</span>
+													</a>
+												</div>
+												<span class="text-muted small"
+													th:text="${#dates.format(comments.created, 'yyyy-MM-dd HH:mm:ss')}">2016-05-25</span>
 											</div>
-											<div class="mb-1" th:utext="${@stringUtil.nl2br(comments.body)}"></div>
+											<!-- コメント本文 -->
+											<div class="mb-2" th:utext="${@stringUtil.nl2br(comments.body)}"></div>
+											<!-- 削除ボタン -->
 											<div th:if="${users.id == comments.users.id}">
 												<a th:href="@{/home/topic/comment/delete/{topicsId}/{commentsId}(topicsId=${topics.id}, commentsId=${comments.id})}"
 													class="btn btn-danger btn-sm">削除する</a>
@@ -108,6 +127,7 @@
 										</div>
 									</div>
 								</div>
+
 							</div><!-- End card -->
 						</div>
 					</div>
@@ -148,7 +168,8 @@
 
 								<div class="col-12">
 									<label for="inputBody" class="form-label">本文</label>
-									<textarea class="form-control" name="body" style="height: 100px" id="inputBody" th:field="*{body}"></textarea>
+									<textarea class="form-control" name="body" style="height: 100px" id="inputBody"
+										th:field="*{body}"></textarea>
 								</div>
 
 								<div class="col-12">
