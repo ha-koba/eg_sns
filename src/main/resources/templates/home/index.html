@@ -37,8 +37,9 @@
 							<div class="card">
 								<!-- トピックヘッダー -->
 								<div class="card-header">
-									<img th:src="${topics.users.iconUri}" src="/assets/img/profile-img.jpg" alt="Profile"
-										class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+									<img
+										th:src="(${topics.users.iconUri} ? ${@storageService.getDataUri(topics.users.iconUri)} : '/assets/img/profile-img.jpg')"
+										alt="Profile" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
 									<span th:text="${topics.users.name}">佐藤太郎</span>
 									<a th:href="@{'/profile/' + ${topics.users.loginId}}">@<span
 											th:text="${topics.users.loginId}">sato</span></a>
@@ -50,7 +51,8 @@
 								<div class="card-body">
 									<h5 class="card-title" th:text="${topics.title}">タイトル</h5>
 									<div th:each="images : ${topics.topicImagesList}">
-										<img th:src="${images.imageUri}" class="img-fluid mb-2"><br>
+										<img th:src="(${images.imageUri} ? ${@storageService.getDataUri(images.imageUri)} : '')"
+											class="img-fluid mb-2"><br>
 									</div>
 									<div th:utext="${@stringUtil.nl2br(topics.body)}"></div>
 								</div>
@@ -141,27 +143,18 @@
 								th:object="${requestTopic}">
 								<div class="col-12">
 									<label for="inputTitle" class="form-label">タイトル</label>
-									<input type="text" name="title" class="form-control" id="inputTitle">
+									<input type="text" name="title" class="form-control" id="inputTitle" th:field="*{title}">
 								</div>
 
 								<div class="col-12">
 									<label for="inputBody" class="form-label">本文</label>
-									<textarea class="form-control" name="body" style="height: 100px" id="inputBody"></textarea>
+									<textarea class="form-control" name="body" style="height: 100px" id="inputBody" th:field="*{body}"></textarea>
 								</div>
 
 								<div class="col-12">
 									<label for="topicFile" class="form-label">写真</label>
 									<!-- <input class="form-control" name="topicFile" type="file" id="topicFile"> -->
 									<div class="col-md-8 col-lg-8">
-										<!-- <span id="previewbox">
-											<img
-												th:if="${requestTopic != null and requestTopic.imageUri != null}"
-												th:src="@{${requestTopic.imageUri}}"
-												src="/assets/img/profile-img.jpg"
-												alt="topic画像"
-												id="previewimg"
-												style="height: 120px;">
-										</span> -->
 										<span id="previewbox">
 											<img th:if="false" alt="topic画像" id="previewimg" style="height: 120px;">
 										</span>
@@ -170,9 +163,7 @@
 												<i class="bi bi-upload btn btn-primary btn-sm"></i>
 												<input type="file" name="topicFile" id="filesend" style="display: none;" accept="image/*">
 											</label>
-											<!-- サーバーにアップロード済みの場合は、ここにimageUriを格納（編集時用） -->
-											<!--<input type="hidden" name="topicFileHidden" id="filesendHidden" th:value="*{imageUri}">-->
-											<!-- リセットボタン（画像が選択されている場合のみ表示） -->
+											<!-- リセットボタン -->
 											<a href="#" class="btn btn-danger btn-sm" title="Remove my profile image"
 												onclick="resetPreview();"><i class="bi bi-trash"></i></a>
 										</div>
