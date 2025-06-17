@@ -144,6 +144,7 @@ public class StorageService {
 			base64EncodedImage = Base64.getEncoder().encodeToString(imageBytes);
 		} catch (IOException e) {
 			e.printStackTrace();
+			log.error("バイト配列をBase64エンコードでエラーが発生しました。", e);
 		}
 
 		return "data:image/jpeg;base64," + base64EncodedImage;
