@@ -26,9 +26,6 @@ public class UsersService {
 	/** リポジトリインターフェース。 */
 	private final UsersRepository repository; // Springにより自動でインスタンスが注入される
 
-	/** パスワードのハッシュ化や照合を行うエンコーダ。 */
-//	private final PasswordEncoder passwordEncoder; // Springにより自動でインスタンスが注入される
-
 	/**
 	 * ユーザー検索を行う。
 	 * ログインIDを指定し、ユーザーを検索する。
