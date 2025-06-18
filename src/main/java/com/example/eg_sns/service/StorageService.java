@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -58,14 +59,14 @@ public class StorageService {
 		// ファイル名生成（UUID + 元ファイル名）
 		String fileName = UUID.randomUUID() + "_" + topicFile.getOriginalFilename();
 
-		try {
+		try (InputStream is = topicFile.getInputStream()) {
 			// 保存先ディレクトリのパス作成
 			Path storageDir = Paths.get(baseDir, fileType.dirName);
 			Files.createDirectories(storageDir);
 
 			// ファイル保存
 			Path targetPath = storageDir.resolve(fileName);
-			Files.copy(topicFile.getInputStream(), targetPath);
+			Files.copy(is, targetPath);
 
 			return fileType.webPath + fileName;
 

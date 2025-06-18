@@ -115,6 +115,9 @@ public class UsersService {
 	public void updatePassword(String loginId, String newPassword) {
 		// ユーザーをログインIDで検索
 		Users users = findUsers(loginId);
+		if (users == null) {
+			return;  // ユーザーが存在しない場合を考慮
+		}
 		// 新しいパスワードを設定
 		users.setPassword(newPassword);
 		// 変更内容をデータベースに保存
@@ -132,7 +135,6 @@ public class UsersService {
 		if (users == null) {
 			return false; // ユーザーが存在しない場合
 		}
-		return rawPassword.equals(users.getPassword());
+		return (users.getPassword()).equals(rawPassword);
 	}
 }
-
